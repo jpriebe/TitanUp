@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="home">ホーム</string>	
+	<string name="settings">設定</string>
+	<string name="openWindow">新しいウインドを開く</string>
+	<string name="newWindow">新しいウインド</string>
+</resources>

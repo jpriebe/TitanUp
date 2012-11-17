@@ -1,0 +1,8 @@
+Each module that needs to access other modules within the libary will need a reference to the top-level
+TitanUp module.  It must have a private TU member as well as a TUInit() function so that the parent library
+can initialize the TU variable immediately after requiring the module.
+
+Each application module that needs to access the library should require it thusly:
+
+var TU = require ('TitanUp/TitanUp');
+

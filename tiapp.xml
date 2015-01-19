@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
     <deployment-targets>
+        <target device="tizen">false</target>
         <target device="mobileweb">true</target>
         <target device="iphone">true</target>
         <target device="ipad">true</target>
         <target device="android">true</target>
         <target device="blackberry">false</target>
     </deployment-targets>
-    <sdk-version>2.1.4.GA</sdk-version>
+    <sdk-version>3.4.1.GA</sdk-version>
     <id>com.smorgasbork.TitanUpDemo</id>
     <name>TitanUpDemo</name>
     <version>1.0</version>
     <publisher>priebe</publisher>
     <url>http://www.smorgasbork.com/</url>
     <description>Demos the TitanUp library.</description>
-    <copyright>2012 by Jason Priebe</copyright>
+    <copyright>2014 by Jason Priebe</copyright>
     <icon>appicon.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
@@ -24,22 +25,52 @@
     <navbar-hidden>false</navbar-hidden>
     <analytics>true</analytics>
     <guid>5b934da9-0b4c-48ca-ab0c-3d47fd248374</guid>
-    <property name="ti.ui.defaultunit">system</property>
-    <iphone>
-        <orientations device="iphone">
-            <orientation>Ti.UI.PORTRAIT</orientation>
-            <orientation>Ti.UI.UPSIDE_PORTRAIT</orientation>
-            <orientation>Ti.UI.LANDSCAPE_LEFT</orientation>
-            <orientation>Ti.UI.LANDSCAPE_RIGHT</orientation>
-        </orientations>
-        <orientations device="ipad">
-            <orientation>Ti.UI.PORTRAIT</orientation>
-            <orientation>Ti.UI.UPSIDE_PORTRAIT</orientation>
-            <orientation>Ti.UI.LANDSCAPE_LEFT</orientation>
-            <orientation>Ti.UI.LANDSCAPE_RIGHT</orientation>
-        </orientations>
-    </iphone>
-    <android xmlns:android="http://schemas.android.com/apk/res/android"/>
+    <property name="ti.ui.defaultunit">dip</property>
+    <ios>
+        <min-sdk-ver>4.5</min-sdk-ver>
+        <plist>
+            <dict>
+                <key>NSLocationWhenInUseUsageDescription</key>
+                <string>Used to demo TitanUp's geolocation support</string>
+                <key>UISupportedInterfaceOrientations~iphone</key>
+                <array>
+                    <string>UIInterfaceOrientationPortrait</string>
+                    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+                    <string>UIInterfaceOrientationLandscapeLeft</string>
+                    <string>UIInterfaceOrientationLandscapeRight</string>
+                </array>
+                <key>UISupportedInterfaceOrientations~ipad</key>
+                <array>
+                    <string>UIInterfaceOrientationPortrait</string>
+                    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+                    <string>UIInterfaceOrientationLandscapeLeft</string>
+                    <string>UIInterfaceOrientationLandscapeRight</string>
+                </array>
+            </dict>
+        </plist>
+    </ios>
+    <android xmlns:android="http://schemas.android.com/apk/res/android">
+        <manifest android:installLocation="auto" android:versionCode="100" android:versionName="2.0.0">
+            <application>
+                <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+            </application>
+            <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19"/>
+            <!-- Allows the API to download data from Google Map servers -->
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <!-- Allows the API to cache data -->
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            <!-- Use GPS for device location -->
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+            <!-- Use Wi-Fi or mobile connection for device location -->
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+            <!-- Allows the API to access Google web-based services -->
+            <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+            <!-- Specify OpenGL ES 2.0 as a requirement -->
+            <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+            <uses-permission android:name="com.smorgasbork.TitanUpDemo.permission.MAPS_RECEIVE"/>
+            <permission android:name="com.smorgasbork.TitanUpDemo.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
+        </manifest>
+    </android>
     <mobileweb>
         <precache/>
         <splash>
@@ -48,5 +79,10 @@
         </splash>
         <theme>default</theme>
     </mobileweb>
-    <modules/>
+    <modules>
+        <module platform="android">net.bajawa.pager</module>
+        <module platform="android">com.tripvi.drawerlayout</module>
+        <module platform="iphone">ti.map</module>
+        <module platform="android">ti.map</module>
+    </modules>
 </ti:app>

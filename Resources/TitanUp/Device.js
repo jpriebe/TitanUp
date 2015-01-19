@@ -1,20 +1,23 @@
+var TU = null;
+
 // don't expose these -- internal use only
 var _osname = '';
 var _platformName = '';
 var _dc = null;
 
 // expose these
+var _defaultunit = '';
 var _os = 'unknown';
-var _displayWidth = 0;
-var _displayHeight = 0;
 var _workingWidth = 0;
 var _workingHeight = 0;
 var _density = '';
 var _dpi = 0;
 var _isTablet = false;
-var _physicalWidth = 0;
-var _physicalHeight = 0;
 var _screensize = 0;
+
+var _ios7plus = false;
+var _android4plus = false;
+var _has_google_play_services = false;
 
 function Device () 
 {
@@ -23,68 +26,88 @@ function Device ()
 
 function initialize ()
 {
+    _defaultunit = Ti.App.Properties.getString ('ti.ui.defaultunit', 'system');
     _osname = Ti.Platform.osname;
     _platformName = Ti.Platform.name;
+
     if (_platformName=== 'iPhone OS')
     {
         _os = 'ios';
+
+        var version = Titanium.Platform.version.split(".");
+        var major = parseInt(version[0],10);
+
+        // Can only test this support on a 3.2+ device
+        if (major >= 7)
+        {
+            _ios7plus = true;
+        }
     }
     else if (_platformName === "android")
     {
         _os = 'android';
+
+        var version = Titanium.Platform.version.split(".");
+        var major = parseInt(version[0],10);
+
+        // Can only test this support on a 3.2+ device
+        if (major >= 4)
+        {
+            _android4plus = true;
+        }
     }
-    
+
+    if (_defaultunit == 'system')
+    {
+        _defaultunit = Device.getNativeUnit ();
+    }
+
+    // normalize this one, it can be either 'dp' or 'dip'
+    if (_defaultunit == 'dip')
+    {
+        _defaultunit = 'dp';
+    }
+
+    if (_defaultunit != 'dp')
+    {
+        TU.Logger.warn ("[TitanUp.Device] ti.ui.defaultunit is not set to 'dp'; it is highly recommended that you set it to 'dp' in your tiapp.xml");
+    }
+
     _dc = Ti.Platform.displayCaps;
 	_density = _dc.density;
 	_dpi = _dc.dpi;
 
-
-    function computePhysicalDimensions ()
-    {
-        var densityFactor = 1;
-
-        if (Device.getNativeUnit() == 'dip')
-        {
-            densityFactor = Device.getLogicalDensityFactor ();
-        }
-        
-        _physicalWidth = _displayWidth / _dpi * densityFactor;
-        _physicalHeight = _displayHeight / _dpi * densityFactor;
-
-        Ti.API.debug ('[TU.Device] _physicalWidth: ' + _physicalWidth);
-        Ti.API.debug ('[TU.Device] _physicalHeight: ' + _physicalHeight);
-    }
-
-    function setDisplayDimensions ()
-    {
-		_displayWidth = _dc.platformWidth;
-		_displayHeight = _dc.platformHeight;
-		
-        Ti.API.debug ('[TU.Device] _displayWidth: ' + _displayWidth);
-        Ti.API.debug ('[TU.Device] _displayHeight: ' + _displayHeight);
-
-		computePhysicalDimensions ();
-    }
-    
-	
-	Ti.Gesture.addEventListener('orientationchange', function(e) {
-		setDisplayDimensions ();
-	});
-
-	setDisplayDimensions ();
-	
-	
-	_screensize = Math.sqrt (_physicalWidth * _physicalWidth + _physicalHeight * _physicalHeight);
+    var pw = Device.getPhysicalWidth();
+    var ph = Device.getPhysicalHeight();
+    _screensize = Math.sqrt (pw * pw + ph * ph);
 
 	_isTablet = (_osname === 'ipad') 
-		|| ((_osname === 'android') && (_screensize >= 6.25));
-		
-	Ti.API.debug ('[TU.Device] _screensize: ' + _screensize);
-	Ti.API.debug ('[TU.Device] _isTablet: ' + (_isTablet) ? 'true' : 'false');
-	
-	_workingWidth = _displayWidth;
-	_workingHeight = _displayHeight;
+		|| ((_os === 'android') && (_screensize >= 6.25));
+
+    TU.Logger.debug ("[TitanUp.Device] os: " + _os);
+    TU.Logger.debug ("[TitanUp.Device] density: " + _density);
+    TU.Logger.debug ("[TitanUp.Device] dpi: " + _dpi);
+    TU.Logger.debug ("[TitanUp.Device] displayWidth: " + Device.getDisplayWidth ());
+    TU.Logger.debug ("[TitanUp.Device] displayHeight: " + Device.getDisplayHeight ());
+    TU.Logger.debug ("[TitanUp.Device] screensize: " + _screensize);
+    TU.Logger.debug ("[TitanUp.Device] isTablet: " + _isTablet);
+
+    if (_os == 'android')
+    {
+        _has_google_play_services = true;
+
+        // kindle fire devices do not have google_play_services
+        if (Ti.Platform.getManufacturer ().match (/amazon/i))
+        {
+            _has_google_play_services = false;
+        }
+    }
+
+	_workingWidth = Device.getDisplayWidth();
+	_workingHeight = Device.getDisplayHeight();
 }
+
+
 
 
 /**
@@ -97,12 +120,79 @@ Device.getOS = function ()
 };
 
 /**
+ * Gets a boolean indicating whether this is iOS 7 or up; this is relevant for layout of windows
+ * @returns {boolean}
+ */
+Device.getiOS7Plus = function ()
+{
+    return _ios7plus;
+};
+
+/**
+ * Gets a boolean indicating whether this is android 4 or up; this is relevant for layout of windows
+ * @returns {boolean}
+ */
+Device.getAndroid4Plus = function ()
+{
+    return _android4plus;
+};
+
+/**
+ * Gets a boolean indicating whether this device is known to have google play services; errs
+ * on the side of assuming that all android devices have play services; only set to false for
+ * known "offenders" like Kindle Fire.
+ * @returns {boolean}
+ */
+Device.getHasGooglePlayServices = function ()
+{
+    return _has_google_play_services;
+};
+
+/**
+ * Sets a boolean indicating whether this device is known to have google play services; errs
+ * on the side of assuming that all android devices have play services; only set to false for
+ * known "offenders".
+ */
+Device.setHasGooglePlayServices = function (has_play_service)
+{
+    _has_google_play_services = has_play_service;
+};
+
+/**
+ * Gets the default unit ('cm', 'dp', 'in', 'mm', 'px'); note that if tiapp.xml specifies 'system',
+ * TitanUp will expand that to the appropriate platform-specific unit ('dp' for ios, 'px' for android)
+ * @return string
+ */
+Device.getDefaultUnit = function ()
+{
+    return _defaultunit;
+};
+
+/**
  * Gets the display width in native units
  * @return int
  */
 Device.getDisplayWidth = function ()
 {
-	return _displayWidth;
+    var densityFactor = Device.getLogicalDensityFactor ();
+
+    if (Device.getNativeUnit () == 'dp')
+    {
+        if (_defaultunit == 'dp')
+        {
+            return _dc.platformWidth;
+        }
+
+        return parseInt (_dc.platformWidth * densityFactor);
+    }
+    else if (Device.getNativeUnit () == 'px')
+    {
+        if (_defaultunit == 'dp')
+        {
+            return parseInt (_dc.platformWidth / densityFactor);
+        }
+        return _dc.platformWidth;
+    }
 };
 
 /**
@@ -111,11 +201,29 @@ Device.getDisplayWidth = function ()
  */
 Device.getDisplayHeight = function ()
 {
-	return _displayHeight;
+    var densityFactor = Device.getLogicalDensityFactor ();
+
+    if (Device.getNativeUnit () == 'dp')
+    {
+        if (_defaultunit == 'dp')
+        {
+            return _dc.platformHeight;
+        }
+        return parseInt (_dc.platformHeight * densityFactor);
+    }
+    else if (Device.getNativeUnit () == 'px')
+    {
+        if (_defaultunit == 'dp')
+        {
+            return parseInt (_dc.platformHeight / densityFactor);
+        }
+        return _dc.platformHeight;
+    }
 };
 
+
 /**
- * Gets the screen density ('low', 'medium', 'high', or 'xhigh')
+ * Gets the screen density ('low', 'medium', 'high', 'xhigh', or 'xxhigh')
  * @return string
  */
 Device.getDensity = function ()
@@ -133,21 +241,21 @@ Device.getDpi = function ()
 };
 
 /**
- * Gets the native display units used on the platform; either 'dip' or 'px'
+ * Gets the native display units used on the platform; either 'dp' or 'px'
  * @return string
  */
 Device.getNativeUnit = function ()
 {
     if (_os == 'ios')
     {
-        return 'dip';
+        return 'dp';
     }
     
     return 'px';
-}
+};
 
 /**
- * Gets the logical density factor (ratio of pixels to dips)
+ * Gets the logical density factor (ratio of pixels to dps)
  * @return float
  */
 Device.getLogicalDensityFactor = function ()
@@ -156,25 +264,28 @@ Device.getLogicalDensityFactor = function ()
     {
         return _dc.logicalDensityFactor;
     }
-    
+
+    // logical density factor not supported on iOS, so we can roll our own
     if (_os == 'ios')
     {
-        // iOS reports platformWidth and platformHeight in dips, but dpi in px,
-        // so we have to compensate for high-density iOS devices; otherwise, we
-        // would get physical sizes like 1" x 1.5"
-        //
-        // Device        Retina       non-Retina
-        // iphone        320dpi       160dpi
-        // ipad          260dpi       130dpi
-        if (((_osname == 'ipad') && (_dpi == 260))
-            || (_dpi == 320))
+        switch (_density)
         {
-            return 2;
+            case 'medium':
+                return 1;
+                break;
+
+            case 'high':
+                return 2;
+                break;
+
+            case 'xhigh':
+                return 3;
+                break;
         }
     }
     
     return 1;
-}
+};
 
 
 /**
@@ -188,20 +299,22 @@ Device.getIsTablet = function ()
 
 /**
  * Gets the physical width of the screen in inches
- * @return float
+ * @return number
  */
 Device.getPhysicalWidth = function ()
 {
-	return _physicalWidth;
+    var densityFactor = Device.getLogicalDensityFactor ();
+    return Device.getDisplayWidth () / _dpi * densityFactor;
 };
 
 /**
  * Gets the physical height of the screen in inches
- * @return float
+ * @return number
  */
 Device.getPhysicalHeight = function ()
 {
-	return _physicalHeight;
+    var densityFactor = Device.getLogicalDensityFactor ();
+    return Device.getDisplayHeight () / _dpi * densityFactor;
 };
 
 /**
@@ -247,9 +360,12 @@ Device.setWorkingDimensions = function (workingWidth, workingHeight)
 {
 	_workingWidth = workingWidth;
 	_workingHeight = workingHeight;
-}
+};
 
-
-initialize ();
+Device.TUInit = function (tu)
+{
+    TU = tu;
+    initialize ();
+};
 
 module.exports = Device;

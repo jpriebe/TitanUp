@@ -19,12 +19,24 @@ function TGWM ()
  */
 TGWM.createTabGroup = function ()
 {
-	_tabgroup = Titanium.UI.createTabGroup();
-	
+    _tabgroup = Titanium.UI.createTabGroup({
+        navBarHidden: false
+    });
+
+    // for Android 4.x and up, with the actionbar, manage the title of the
+    // action bar as the user changes tabs
+    if ((TU.Device.getOS() == 'android')
+       && (Ti.Platform.Android.API_LEVEL >= 11)) {
+        
+        _tabgroup.addEventListener('open', function(e) {
+            _tabgroup.activity.actionBar.title = Ti.App.name;
+        });
+    }
+    
 	_tabgroup.addEventListener ('focus', function (e) {
 		if (e.previousIndex != e.index)
 		{
-			//Ti.API.debug ('[TU.UI.TGWM] active tab changed from tab ' + e.previousIndex + ' to tab ' + e.index);
+			//TU.Logger.debug ('[TU.UI.TGWM] active tab changed from tab ' + e.previousIndex + ' to tab ' + e.index);
 			if ((e.previousIndex >= 0) && (e.previousTab != null))
 			{
 				e.previousTab.getWindow ().fireEvent ('tabinactive', e);
@@ -41,7 +53,7 @@ TGWM.createTabGroup = function ()
  * and based on the os platform
  * @param Ti.UI.Window w
  */
-TGWM.openWindow = function (w)
+TGWM.TUopenWindow = function (w)
 {
 	if (_tabgroup != null)
 	{
@@ -72,7 +84,7 @@ TGWM.openWindow = function (w)
  * it through the TabGroup; otherwise, closes it directly.
  * @param Ti.UI.Window w
  */
-TGWM.closeWindow = function (w)
+TGWM.TUcloseWindow = function (w)
 {
 	if (_tabgroup != null)
 	{
@@ -107,25 +119,26 @@ TGWM.closeOnTabInactive = function (win)
 	{
 		mytabwin.removeEventListener ('tabinactive', onTabInactive);
 		TGWM.closeWindow (win);
-	}
+	};
 	
 	if (mytabwin)
 	{
 		mytabwin.addEventListener ('tabinactive', onTabInactive);
 	}
-}
+};
 
 
 
 TGWM.getActiveTab = function ()
 {
 	return _tabgroup.getActiveTab();	
-}
+};
 
 
 TGWM.TUInit = function (tu)
 {
 	TU = tu;
+    TU.UI.TGWM = TGWM;
 };
 
 

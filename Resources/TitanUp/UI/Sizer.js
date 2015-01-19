@@ -1,26 +1,86 @@
 var TU = null;
 
-var _isIOS = false;
+var _defaultunit = '';
 var _density = 'medium';
 var _isTablet = false;
 
 /**
  * A utility class to help build interfaces that are consistently sized across platforms.  Use the utility
  * functions getDimension() and getDimensionExact() to get dimension values that result in consistent
- * sizes. 
- * 
- * This library utilizes native units (dp for iOS, px for Android).  This means that we're more or
- * less dealing with physical pixels except in the case of retina display iOS, where we're treating
- * the retina iphone as if it were a 320x480 device.
- * 
- * Using native units has the advantage that you can just pass numeric values as the size and position
- * for your views; you don't need to add any modifiers like 'px' or 'dp'.  If we were to pick one unit
- * and utilize it across the board (e.g. pixels), we'd have to tack on 'px' to every dimension we ever
- * use.
+ * sizes.
  */
 function Sizer ()
 {
 }
+
+
+/**
+ * Given a value in pixels, converts it to dp
+ * @param px
+ * @returns int
+ */
+Sizer.pxToDp = function  (px)
+{
+    var dp = px;
+    switch (_density)
+    {
+        case 'low':
+            dp = parseInt (px / 0.75);
+            break;
+
+        case 'medium':
+            dp = px;
+            break;
+
+        case 'high':
+            dp = parseInt (px / 1.5);
+            break;
+
+        case 'xhigh':
+            dp = parseInt (px / 2);
+            break;
+
+        case 'xxhigh':
+            dp = parseInt (px / 3);
+            break;
+    }
+
+    return dp;
+};
+
+/**
+ * Given a value in dp, converts it to px
+ * @param dp
+ * @returns int
+ */
+Sizer.dpToPx = function  (dp)
+{
+    var px = dp;
+    switch (_density)
+    {
+        case 'low':
+            px = parseInt (dp * 0.75);
+            break;
+
+        case 'medium':
+            px = dp;
+            break;
+
+        case 'high':
+            px = parseInt (dp * 1.5);
+            break;
+
+        case 'xhigh':
+            px = parseInt (dp * 2);
+            break;
+
+        case 'xxhigh':
+            px = parseInt (dp * 3);
+            break;
+    }
+
+    return px;
+};
 
 /**
  * Given a dimension that is tuned for medium-density displays, returns the appropriate
@@ -34,42 +94,21 @@ function Sizer ()
  */
 Sizer.getDimension = function (m) 
 {
-	if (_isIOS)
-	{
-		//Ti.API.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); iOS: return " + m + "dp");
-		return m;
-	}
-	
-	Ti.API.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); density: " + _density);
+    if (_defaultunit == 'dp')
+    {
+        return m;
+    }
 
-	var l = parseInt (m * 0.75);
-	var h = parseInt (m * 1.5);
-	var xh = m * 2;
-	
-	var dimension = m;
-	
-	switch (_density)
-	{
-		case 'low':
-			dimension = (_isTablet) ? m : l;			
-			break;
-			
-		case 'medium':
-			dimension = (_isTablet) ? h : m;			
-			break;
-			
-		case 'high':
-			dimension = (_isTablet) ? xh : h;			
-			break;
-		
-		case 'xhigh':
-			dimension = xh;		
-			break;
-	}
-	
-	return dimension;
-	
+    var l = parseInt (m * 0.75);
+    var h = parseInt (m * 1.5);
+    var xh = m * 2;
+    var xxh = m * 3;
+
+    return Sizer.getDimensionExact (l, m, h, xh, xxh);
 };
+
+
+
 
 /**
  * Similar to getDimension(), but the caller provides the exact dimensions for all display densities;
@@ -85,61 +124,63 @@ Sizer.getDimension = function (m)
  * @param int m
  * @param int h
  * @param int xh
+ * @param int xxh
  * @return int
  */
-Sizer.getDimensionExact = function (l, m, h, xh)
+Sizer.getDimensionExact = function (l, m, h, xh, xxh)
 {
-	if (_isIOS)
-	{
-		//Ti.API.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); iOS: return " + m + "dp");
-		return m;
-	}
-	
-	// default to highest resolution available, just in case there's some density out there
-	// even higher than xhigh
-	var dimension = xh;
-	
-	//Ti.API.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); density: " + _density);
-	switch (_density)
-	{
-		case 'low':
-			dimension = (_isTablet) ? m : l;			
-			break;
-			
-		case 'medium':
-			dimension = (_isTablet) ? h : m;			
-			break;
-			
-		case 'high':
-			dimension = (_isTablet) ? xh : h;			
-			break;
-		
-		case 'xhigh':
-			dimension = xh;		
-			break;
-	}
-	
-	return dimension;
-}
+    if (_defaultunit == 'dp')
+    {
+        //TU.Logger.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); defaultunit == dp: return " + m + "dp");
+        return m;
+    }
+    
+    // default to highest resolution available, just in case there's some density out there
+    // even higher than xhigh
+    var dimension = xh;
+    
+    //TU.Logger.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); density: " + _density);
+    switch (_density)
+    {
+        case 'low':
+            dimension = l;          
+            break;
+            
+        case 'medium':
+            dimension = m;          
+            break;
+            
+        case 'high':
+            dimension = h;          
+            break;
+        
+        case 'xhigh':
+            dimension = xh;     
+            break;
+
+        case 'xxhigh':
+            dimension = xxh;     
+            break;
+    }
+    
+    return dimension;
+};
 
 function initialize ()
 {
-	_density = TU.Device.getDensity ();
+    _density = TU.Device.getDensity ();
 
-	if (TU.Device.getOS () == 'ios')
-	{
-		_isIOS = true;
-	}
-	
-	_isTablet = TU.Device.getIsTablet ();
+    _defaultunit = TU.Device.getDefaultUnit ();
+
+    _isTablet = TU.Device.getIsTablet ();
 }
 
 
 Sizer.TUInit = function (tu)
 {
-	TU = tu;
-	initialize ();
-}
+    TU = tu;
+    initialize ();
+};
 
 
 

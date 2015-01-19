@@ -1,20 +1,6 @@
 /**
  * TitanUp library for Titanium Mobile development
  * 
- * Provides a number of very common features:
- *   - OS detection (iOS vs android)
- *   - display dimensions (including working area sans tabs and title bars)
- *   - tablet/nontablet
- *   - TabGroup window management
- *   - a sane place to store global variables if required
- *   - LocationManager; a cross-platform location service that is fairly battery-conservative
- *   - some additional UI controls:
- *      - ImageButton
- *      - SelectBar
- *      - SimplePicker
- *      - ManagedMapView
- *      - GalleryView
- *  
  * To use it, put this in your app.js (in the global scope):
  * 
  * var TU = require ('/TitanUp/TitanUp');
@@ -22,7 +8,9 @@
 
 var start = new Date().getTime();
 
-_version = '0.1.0';
+var _version = '2.0.0';
+
+var LocationManager = null;
 
 function TitanUp ()
 {
@@ -32,22 +20,36 @@ function TitanUp ()
 TitanUp.getVersion = function ()
 {
     return _version;
-}
+};
 
-Ti.API.debug ('[TitanUp] initializing...');
+TitanUp.Logger = require ('/TitanUp/Logger');
+TitanUp.Logger.debug ('[TitanUp] initializing...');
 
 TitanUp.Device = require ('/TitanUp/Device');
+TitanUp.Device.TUInit (TitanUp);
+
+TitanUp.Context = require ('/TitanUp/Context');
+TitanUp.Context.TUInit (TitanUp);
 
 TitanUp.UI = require ('/TitanUp/UI/UI');
 TitanUp.UI.TUInit (TitanUp);
 
-TitanUp.LocationManager = require ('/TitanUp/LocationManager');
-TitanUp.LocationManager.TUInit (TitanUp);
+
+TitanUp.getLocationManager = function ()
+{
+    if (LocationManager == null)
+    {
+        LocationManager = require ('/TitanUp/LocationManager');
+        LocationManager.TUInit (TitanUp);
+    }
+
+    return LocationManager;
+};
 
 TitanUp.Globals = {};
 
 var elapsed = new Date().getTime() - start;
-Ti.API.debug ("[TitanUp] load time: " + elapsed + " ms");
+TitanUp.Logger.debug ("[TitanUp] load time: " + elapsed + " ms");
 
 module.exports = TitanUp;
 

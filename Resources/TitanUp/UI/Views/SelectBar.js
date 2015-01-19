@@ -11,7 +11,7 @@ var TU = null;
  * });
  * 
  * sb.addEventListener ('TUchange', function (e) {
- * 	   Ti.API.debug ('new index: ' + e.index);
+ * 	   TU.Logger.debug ('new index: ' + e.index);
  * });
  *
  * sb.xsetSelectedIndex (1);
@@ -29,7 +29,9 @@ var TU = null;
  * NOTE:
  * The width of the control must be divisble evenly by the number of labels; otherwise, Titanium
  * will miscalculate the width of the switch views in android, and the switches will not fit
- * inside the parent view. 
+ * inside the parent view.  Code inside SelectBar will enforce this, but only if you specify an
+ * explicit absolute width.  Don't try to just use left and right; instead, get the working area
+ * of the parent view, and subtract the margins so you can pass an absolute width to the SelectBar.
  * 
  * @param {Object} params
  */
@@ -115,6 +117,11 @@ function SelectBar (params)
 			params.height = Ti.UI.SIZE;
 		}
 		
+        if (typeof params.backgroundColor == 'undefined')
+        {
+            params.backgroundColor = TU.UI.Theme.darkBackgroundColor;
+        }
+
 		if (TU.Device.getOS () == 'ios')
 		{
 			if (typeof params.style == 'undefined')
@@ -124,37 +131,47 @@ function SelectBar (params)
 			
 			_self = Ti.UI.iOS.createTabbedBar(params);
 
-			var gotclickevent;
-			
 			_self.addEventListener ('click', function (e) {
+			    //TU.Logger.debug ('[SelectBar] click; e.index=' + e.index);
+			    if (_current_idx == e.index)
+			    {
+			        return;
+			    }
 				_current_idx = e.index;
-				gotclickevent = true;
 				_self.fireEvent ('TUchange', { index: _self.xgetSelectedIndex () });
 			});
-			
+
 			if (_allow_deselect)
 			{
-				// @HACK: we're taking advantage of the fact that the click event seems
-				// to fire before the singletap event on iOS; if we see a singletap
-				// without a corresponding click event, we know that the user is
-				// tapping a previously-selected button; therefore we can deselect it.
+				// @HACK: on iOS, you get a singletap followed by a click event whenever
+				// the user changes a value of the TabbedBar.  But if you tap an already-
+				// selected button on the bar, you only get the singletap
 				_self.addEventListener ('singletap', function (e) {
-					if (!gotclickevent)
-					{
-						_self.setIndex (null);
-						_self.fireEvent ('TUchange', { index: -1 });
-					}
-					gotclickevent = false;
+				    var idx = parseInt (e.x / Math.round (_self.size.width / _labels.length));
+                    //TU.Logger.debug ('[SelectBar] singletap; idx=' + idx);
+				    if (idx == _current_idx)
+				    {
+				        _current_idx = -1;
+                        _self.setIndex (null);
+                        _self.fireEvent ('TUchange', { index: -1 });
+				    }
 				});
 			}
 		}
 	
 		else
 		{
-			params.layout = 'horizontal'
+			params.layout = 'horizontal';
 			var btnw = parseInt (100 / _labels.length); 
 			btnw = '' + btnw + '%';
-			
+
+            // make sure width is divisible by the number of themes; this has to do with buggy rounding in
+            // percentage-based widths; if the rounding doesn't add up to < 100%, you'll drop the last button
+            if (typeof params.width !== 'undefined')
+            {
+                params.width = params.width - (params.width % _labels.length);
+            }
+
 			_self = Ti.UI.createView(params);
 			for (var i = 0; i < _labels.length; i++)
 			{
@@ -170,7 +187,7 @@ function SelectBar (params)
 				_self.add (button);
 			}
 		}
-	}
+	};
 	
 	_init (params);
 	if (_self == null)
@@ -227,7 +244,7 @@ function SelectBar (params)
 		{
 			_buttons[j].enabled = enabled;
 		}
-	}
+	};
 	
 	return _self;
 }

@@ -4,10 +4,10 @@ function UIThemeDemoWindow ()
 {
 	var _self = Ti.UI.createWindow ({
 		title: 'TU.UI.Theme',
-		backgroundColor: TU.UI.Theme.backgroundColor
+		backgroundColor: TU.UI.Theme.lightBackgroundColor
 	});
 	
-	var margin = TU.UI.Sizer.getDimension (10);
+	var margin = 10;
 	
 	var themes = ['default', 'blue', 'red'];
 
@@ -22,8 +22,6 @@ function UIThemeDemoWindow ()
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
@@ -35,8 +33,8 @@ function UIThemeDemoWindow ()
 		right: margin,
 		top: margin,
 		text: "TU.UI.Theme provides a standardized place to define colors and fonts used in your application; all it really does is bring a little structure to this process.  This demo allows you to change the theme of the app -- there's no magic here, you have to restart to see the changes, but as you can see it makes the process fairly clean.",
-        color: TU.UI.Theme.textColor,
-        font: TU.UI.Theme.fonts.small
+        color: TU.UI.Theme.darkTextColor,
+        font: TU.UI.Theme.fonts.medium
 	});
 
 	contentview.add (l);
@@ -52,7 +50,8 @@ function UIThemeDemoWindow ()
 		left: margin,
 		top: margin,
 		width: ctlwidth,
-		labels: themes
+		labels: themes,
+        allow_deselect: false
 	});
 
 	for (var i = 0; i < themes.length; i++)

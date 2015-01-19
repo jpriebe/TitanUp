@@ -8,33 +8,34 @@ function UIViewsDemoWindow ()
 	
 	_self = Ti.UI.createWindow ({
 		title: 'TU.UI.Views',
-		backgroundColor: TU.UI.Theme.backgroundColor	
+		backgroundColor: TU.UI.Theme.lightBackgroundColor	
 	});
 	
-	var margin = TU.UI.Sizer.getDimension (10);
-	var rowh = TU.UI.Sizer.getDimension (40);
+	var margin = 10;
+	var rowh = 60;
 	
 	_tv_menu = Ti.UI.createTableView ({
 		top: margin,
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor
 	});
 	
 	var rows = [
 		{ title: "TU.UI.GalleryView" },
-		{ title: "TU.UI.ManagedMapView"  },
 		{ title: "TU.UI.SelectBar" },
-		{ title: "TU.UI.SimplePicker" }
+		{ title: "TU.UI.SimplePicker" },
+        { title: "TU.UI.ViewPager" },
+        { title: "TU.UI.ModalView" },
+        { title: "TU.UI.TextField" },
+        { title: "TU.UI.RemoteImageView" }
 	];
 	
 	for (var i = 0; i < rows.length; i++)
 	{
 		rows[i].height = rowh;
-		rows[i].color = TU.UI.Theme.textColor;
+		rows[i].color = TU.UI.Theme.darkTextColor;
 		rows[i].backgroundColor = TU.UI.Theme.lightBackgroundColor;
 		rows[i].selectedBackgroundColor = TU.UI.Theme.highlightColor;
 	}
@@ -51,27 +52,37 @@ function UIViewsDemoWindow ()
 				break;
 				
 			case rows[1].title:
-				var UIViewsManagedMapViewDemoWindow = require ('/ui/UIViewsManagedMapViewDemoWindow');
-				win = new UIViewsManagedMapViewDemoWindow ();
-				break;
-				
-			case rows[2].title:
 				var UIViewsSelectBarDemoWindow = require ('/ui/UIViewsSelectBarDemoWindow');
 				win = new UIViewsSelectBarDemoWindow ();
 				break;
 				
-			case rows[3].title:
+			case rows[2].title:
 				var UIViewsSimplePickerDemoWindow = require ('/ui/UIViewsSimplePickerDemoWindow');
 				win = new UIViewsSimplePickerDemoWindow ();
 				break;
 
-			case rows[4].title:
-				var UIViewsDemoWindow = require ('/ui/UIViewsDemoWindow');
-				win = new UIViewsDemoWindow ();
-				break;
+            case rows[3].title:
+                var UIViewsViewPagerDemoWindow = require ('/ui/UIViewsViewPagerDemoWindow');
+                win = new UIViewsViewPagerDemoWindow ();
+                break;
+
+            case rows[4].title:
+                var UIViewsModalViewDemoWindow = require ('/ui/UIViewsModalViewDemoWindow');
+                win = new UIViewsModalViewDemoWindow ();
+                break;
+
+            case rows[5].title:
+                var UIViewsTextFieldDemoWindow = require ('/ui/UIViewsTextFieldDemoWindow');
+                win = new UIViewsTextFieldDemoWindow ();
+                break;
+
+            case rows[6].title:
+                var UIViewsRemoteImageViewDemoWindow = require ('/ui/UIViewsRemoteImageViewDemoWindow');
+                win = new UIViewsRemoteImageViewDemoWindow ();
+                break;
 		}
 		
-		TU.UI.TGWM.openWindow (win);
+		TU.UI.openWindow (win);
 	});
 	
 	_self.add (_tv_menu);

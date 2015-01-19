@@ -4,11 +4,11 @@ function UIViewsGalleryViewDemoWindow ()
 {
 	var _self = Ti.UI.createWindow ({
 		title: 'TU.UI.Views.GalleryView',
-		backgroundColor: TU.UI.Theme.backgroundColor
+		backgroundColor: TU.UI.Theme.lightBackgroundColor
 	});
 	
-	var margin = TU.UI.Sizer.getDimension (10);
-	var imgw = TU.UI.Sizer.getDimension (240);
+	var margin = 10;
+	var imgw = 240;
 	
 	var images = [
 		{
@@ -120,8 +120,6 @@ function UIViewsGalleryViewDemoWindow ()
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
@@ -133,8 +131,8 @@ function UIViewsGalleryViewDemoWindow ()
 		right: margin,
 		top: margin,
 		text: "TU.UI.Views.GalleryView is an android/ios image gallery; it is designed to run full-screen.  It can also accept an ad view that is added to the thumbnail view and the full image views.",
-        color: TU.UI.Theme.textColor,
-        font: TU.UI.Theme.fonts.small
+        color: TU.UI.Theme.darkTextColor,
+        font: TU.UI.Theme.fonts.medium
 	});
 
 	contentview.add (l);
@@ -153,18 +151,20 @@ function UIViewsGalleryViewDemoWindow ()
 		});
 
 		var gv = TU.UI.createGalleryView ({
-	        images: images,
 	        backgroundColor: '#000',
 	        borderColor: '#fff',
 	        left: 0,
 	        right: 0,
 	        top: 0,
-	        bottom: 0
+	        bottom: 0,
+	        config: {
+                images: images
+	        }
 	    });
 	    
 	    win.add (gv);
 	    
-	    TU.UI.TGWM.openWindow (win);
+	    TU.UI.openWindow (win);
 	});
 	
 	_self.add (contentview);

@@ -6,19 +6,17 @@ function UIViewsSimplePickerDemoWindow ()
 	
 	var _self = Ti.UI.createWindow ({
 		title: 'TU.UI.Views.SimplePicker',
-		backgroundColor: TU.UI.Theme.backgroundColor
+		backgroundColor: TU.UI.Theme.lightBackgroundColor
 	});
 	
-	var margin = TU.UI.Sizer.getDimension (10);
-	var imgw = TU.UI.Sizer.getDimension (240);
+	var margin = 10;
+	var imgw = 240;
 	
 	var contentview = Ti.UI.createView ({
 		top: margin,
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
@@ -30,8 +28,8 @@ function UIViewsSimplePickerDemoWindow ()
 		right: margin,
 		top: margin,
 		text: "TU.UI.Views.SimplePicker is an android/ios implementation of a dropdown list; it allows you to have a picker that doesnt take up half the screen on iOS.",
-        color: TU.UI.Theme.textColor,
-        font: TU.UI.Theme.fonts.small
+        color: TU.UI.Theme.darkTextColor,
+        font: TU.UI.Theme.fonts.medium
 	});
 
 	contentview.add (l);
@@ -41,7 +39,8 @@ function UIViewsSimplePickerDemoWindow ()
 		right: margin,
 		top: margin,
 		title: "Your Choice",
-		values: ['foo', 'bar', 'baz']
+		values: ['foo', 'bar', 'baz'],
+		parent: _self
 	});
 	
 	_sp1.addEventListener ('TUchange', function (e) {
@@ -54,7 +53,7 @@ function UIViewsSimplePickerDemoWindow ()
 		top: margin,
 		left: margin,
 		text: "",
-        color: TU.UI.Theme.textColor,
+        color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.medium
 	});
 	

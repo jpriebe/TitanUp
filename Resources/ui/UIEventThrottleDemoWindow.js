@@ -9,18 +9,17 @@ function UIEventThrottleDemoWindow ()
 	
 	_self = Ti.UI.createWindow ({
 		title: 'TU.UI.EventThrottle',
-		backgroundColor: TU.UI.Theme.backgroundColor	
+		backgroundColor: TU.UI.Theme.lightBackgroundColor	
 	});
 	
-	var margin = TU.UI.Sizer.getDimension (10);
+	var margin = 10;
 	
 	var contentview = Ti.UI.createView ({
 		top: margin,
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
+		borderColor: TU.UI.Theme.darkTextColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
@@ -32,8 +31,8 @@ function UIEventThrottleDemoWindow ()
 		right: margin,
 		top: margin,
 		text: "Button clicks to open new windows can be double-triggered with a quick second tap before the window opens.  Titanium doesn't prevent that, but the EventThrottle can 'debounce' those events'.",
-        color: TU.UI.Theme.textColor,
-        font: TU.UI.Theme.fonts.small
+        color: TU.UI.Theme.darkTextColor,
+        font: TU.UI.Theme.fonts.medium
 	});
 	
 	contentview.add (l);
@@ -47,7 +46,7 @@ function UIEventThrottleDemoWindow ()
 
 	btn.addEventListener ('click', function (e) {        
         var w = new CountingWindow ();
-        TU.UI.TGWM.openWindow (w);
+        TU.UI.openWindow (w);
 	});
 	
 	contentview.add (btn);
@@ -69,7 +68,7 @@ function UIEventThrottleDemoWindow ()
                 
         var w = new CountingWindow ();
         et.setWindow (w);
-        TU.UI.TGWM.openWindow (w);
+        TU.UI.openWindow (w);
 	});
 	
 	contentview.add (btn);

@@ -7,19 +7,17 @@ function UIViewsSelectBarDemoWindow ()
 	
 	var _self = Ti.UI.createWindow ({
 		title: 'TU.UI.Views.SelectBar',
-		backgroundColor: TU.UI.Theme.backgroundColor
+		backgroundColor: TU.UI.Theme.lightBackgroundColor
 	});
 	
-	var margin = TU.UI.Sizer.getDimension (10);
-	var imgw = TU.UI.Sizer.getDimension (240);
+	var margin = 10;
+	var imgw = 240;
 	
 	var contentview = Ti.UI.createView ({
 		top: margin,
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
@@ -31,8 +29,8 @@ function UIViewsSelectBarDemoWindow ()
 		right: margin,
 		top: margin,
 		text: "TU.UI.Views.SelectBar is an android/ios implementation of a 'TabbedBar'",
-        color: TU.UI.Theme.textColor,
-        font: TU.UI.Theme.fonts.small
+        color: TU.UI.Theme.darkTextColor,
+        font: TU.UI.Theme.fonts.medium
 	});
 
 	contentview.add (l);
@@ -50,7 +48,7 @@ function UIViewsSelectBarDemoWindow ()
 		top: margin,
 		left: margin,
 		text: "No deselection",
-        color: TU.UI.Theme.textColor,
+        color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.mediumBold
 	});
 	
@@ -70,7 +68,7 @@ function UIViewsSelectBarDemoWindow ()
 		top: margin,
 		left: margin,
 		text: "Deselection",
-        color: TU.UI.Theme.textColor,
+        color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.mediumBold
 	});
 	
@@ -89,7 +87,7 @@ function UIViewsSelectBarDemoWindow ()
 		top: margin,
 		left: margin,
 		text: "TUchange event",
-        color: TU.UI.Theme.textColor,
+        color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.mediumBold
 	});
 	
@@ -112,7 +110,7 @@ function UIViewsSelectBarDemoWindow ()
 		top: margin,
 		left: margin,
 		text: "",
-        color: TU.UI.Theme.textColor,
+        color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.medium
 	});
 	

@@ -17,8 +17,8 @@ if (Ti.version < 1.8 ) {
 	alert('Sorry - this application template requires Titanium Mobile SDK 1.8 or later');
 }
 
-(function() {
-	var MenuWindow = require ('/ui/MenuWindow');
+(function() {	
+	TU.getLocationManager ().init (30);
 
 	function setTheme ()
 	{
@@ -30,56 +30,106 @@ if (Ti.version < 1.8 ) {
 				break;
 
 			case 'blue':
-				TU.UI.Theme.backgroundColor = '#449BE8';
-				TU.UI.Theme.lightBackgroundColor = '#C6FFFE';
-				TU.UI.Theme.darkBackgroundColor = '#5860FF';
-				TU.UI.Theme.highlightColor = '#F754FF';
-				TU.UI.Theme.textColor = '#6F0BE8';
+				TU.UI.Theme.lightBackgroundColor = '#fff';
+				TU.UI.Theme.mediumBackgroundColor = '#BBDEFB';
+				TU.UI.Theme.darkBackgroundColor = '#1976D2';
+				TU.UI.Theme.highlightColor = '#8BC34A';
+                TU.UI.Theme.darkTextColor = '#212121';
+                TU.UI.Theme.lightTextColor = '#fff';
 				break;
 
 			case 'red':
-				TU.UI.Theme.backgroundColor = '#BA3D49';
-				TU.UI.Theme.lightBackgroundColor = '#F1E6D4';
-				TU.UI.Theme.darkBackgroundColor = '#791F33';
-				TU.UI.Theme.highlightColor = '#B0AEAB';
-				TU.UI.Theme.textColor = '#66605F';
+				TU.UI.Theme.lightBackgroundColor = '#fff';
+                TU.UI.Theme.mediumBackgroundColor = '#FFCDD2';
+				TU.UI.Theme.darkBackgroundColor = '#D32F2F';
+				TU.UI.Theme.highlightColor = '#FF9800';
+				TU.UI.Theme.darkTextColor = '#212121';
+                TU.UI.Theme.lightTextColor = '#fff';
 				break;
 		}
 	}
 	
+	// disable the drawer's "open by default" behavior
+	Ti.App.Properties.setBool ("General.drawer_opened", true);
+	 
 	setTheme ();
 
-	var tg, t, w;
+	var wm, t, w;
+	
+	var mitems = [
+	    { identifier: "TU.Device", caption: "TU.Device" },
+        { identifier: "TU.Globals", caption: "TU.Globals" },
+        { identifier: "TU.LocationManager", caption: "TU.LocationManager" },
+        { identifier: "TU.UI", caption: "TU.UI" }
+	];
+	
+	var main_view = Ti.UI.createView ({
+	    backgroundColor: TU.UI.Theme.lightBackgroundColor
+	});
 
-	tg = TU.UI.TGWM.createTabGroup ();
-	
-	w = new MenuWindow ();
-	
-	t = Ti.UI.createTab ({
-		title: 'Menu',
-		window: w
-	});
-	
+    var l = Ti.UI.createLabel ({
+        left: 10,
+        right: 10,
+        top: 10,
+        text: "Welcome to the TitanUp demo application.  To see some of the capabilities of the library, select an option from the drawer menu on the left.",
+        color: TU.UI.Theme.textColor,
+        font: TU.UI.Theme.fonts.medium
+    });
+    main_view.add (l);
 
-	tg.addTab (t);
+	wm = TU.UI.createDrawerMenuWM ({
+            title: "TitanUp",
+            backgroundColor: TU.UI.Theme.backgroundColor,
+            main_view: main_view,
+            menu_params: {
+                background_color: TU.UI.Theme.darkBackgroundColor
+            },
+            ios_options: {
+                bar_color: TU.UI.Theme.darkBackgroundColor, // ios-only
+                bar_text_color: 'white'
+            },
+            menu_items: mitems
+        });
 	
-	w = Ti.UI.createWindow ({
-		title: "Tab 2",
-		backgroundColor: TU.UI.Theme.backgroundColor
-	});
-	var l1 = Ti.UI.createLabel ({
-		text: "This tab window exists for the TGWM demo.",
-		color: TU.UI.Theme.textColor
-	});
-	w.add (l1);
-	
-	t = Ti.UI.createTab ({
-		title: 'Tab 2',
-		window: w
-	});
-	
+    function on_menu_item_selected (e)
+    {
+        var v = null;
+        switch (e.identifier)
+        {
+            case 'TU.Device':
+                var DeviceDemoView = require ('/ui/DeviceDemoView');
+                v = new DeviceDemoView ();
+                break;
 
-	tg.addTab (t);
-		
-	tg.open ();
+            case 'TU.Globals':
+                var GlobalsDemoView = require ('/ui/GlobalsDemoView');
+                v = new GlobalsDemoView ();
+                break;
+
+            case 'TU.LocationManager':
+                // open the LocationDemoView in a new window; there are problems
+                // with the Drawer Menu and Map views
+                var LocationDemoView = require ('/ui/LocationDemoView');
+                v = new LocationDemoView ();
+                var w = Ti.UI.createWindow ();
+                w.add (v);
+                TU.UI.openWindow (w);
+                v = null;
+                break;
+
+            case 'TU.UI': 
+                var UIDemoView = require ('/ui/UIDemoView');
+                v = new UIDemoView ();
+                break;
+        }
+        if (v)
+        {
+            wm.replaceView (v);
+        }
+    }
+	
+	wm.addEventListener ('menu_item_selected', on_menu_item_selected);
+	
+	wm.open ();
+
 })();

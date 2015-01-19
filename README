@@ -1,12 +1,138 @@
 TitanUp is a library of utility functions for Titanium Mobile that provides
-a number of custom views like an ImageGallery, a cross-platform SimplePicker,
-a SelectBar, as well as utilities for building dynamic multi-density user
-interfaces, managing themes, and managing windows within tabgroups.
+a number of custom views like GalleryView, ViewPager, SimplePicker, ModalView,
+SelectBar, and utilities for building dynamic multi-density user
+interfaces, managing themes, and window management.
+
+Everything in TitanUp is designed to be cross-platform.  My Titanium philosophy
+says that if you're not doing cross-platform development, why are you using
+Titanium in the first place?  The way to maximize your benefit from the platform
+is to go cross-platform. 
+
+TitanUp relies on some third-party Titanium modules for a couple of its views:
+  - ViewPager: net.bajawa.pager (https://marketplace.appcelerator.com/apps/2228)
+  - DrawerMenuWM: DrawerLayout (https://github.com/Tripvi/Ti.DrawerLayout)
+  - GalleryView:
+    - net.bajawa.pager (https://marketplace.appcelerator.com/apps/2228)
+    - (optional) TiTouchImageView (https://github.com/iotashan/TiTouchImageView/)
+
+If you aren't using these classes, you don't need to install these modules.
 
 This distribution includes a demo app that uses all the features of the
 library, so it should be fairly apparent how to use it.
 
-For more on the capabilities of the library, see
+To use TitanUp, be sure to set your default unit to "dip" by adding this to
+your tiapp.xml:
 
-http://smorgasbork.com/component/content/article/38-titanium-mobile/136-titanium-mobile-utility-library-titanup
+    <property name="ti.ui.defaultunit">dip</property>
+    
+The app will log a warning if you don't do this.
 
+Class overview
+
+TU.LocationManager
+ - uses best practices for battery management on android, ios
+ - callbacks when distance changes by a specific amount
+
+TU.Globals
+ - convenient place to define global variables
+
+TU.Logger
+ - very simple wrapper for Ti.API.(trace|debug|info|warn|error) functions;
+   keeps a circular buffer of log messages so that the runtime can access
+   the logs for field diagnosis of problems
+
+TU.Device
+ - simple platform detection: ios/android (I find Titanium's functions
+   cumbersome and inconsistent with their naming)
+ - detect phone vs tablet
+ - easy tests for key platform versions (iOS 7+, android 4+)
+
+TU.Context
+ - tracks pause/resume for android
+
+TU.UI
+ - centralized open/close window call that uses best practices for
+   use with NavigationWindow on iOS; ties into TU.Context, monitors the
+   depth of the window stack, integrates with window managers
+
+TU.UI.EventThrottle
+ - prevents accidental double-firing of events on buttons (e.g. when you
+   are opening a window in response to a button tap, the user might
+   open two windows, which is obviously not intended)
+ - hide/show navbar/actionbar convenience routines
+
+TU.UI.Theme
+ - centralized set of definitions for colors and fonts
+ - routines for scaling fonts and adjusting luminance of colors
+
+TU.UI.Sizer
+ - convenience functions for dp-to-px conversions
+ - computes appropriate pixel size of UI elements based on display density
+
+TU.UI.TWGM
+ - tab-group window manager
+
+TU.UI.DrawerMenuWM
+ - a "drawer menu" window manager (requires manumaticx's Ti.DrawerLayout module)
+  
+TU.UI.OAWindow
+ - an "orientation aware" window that registers an event listener for
+   the orientationchange event, removing the listener when the window is
+   closed to prevent memory leaks; fires its own orientationchange event
+   which can be safely listened to in your code
+ - filters out faceup/facedown, which in my experience, are not very useful
+ - allows you to hide the ActionBar/NavBar when in landscape mode; this is
+   particularly useful in apps that have a mix of windows that are locked
+   to portrait and windows that support portrait and landscape; on
+   iOS, closing a window in landscape when the underlying window doesn't
+   support landscape can cause some nastiness; by hiding the NavBar, you 
+   can force the user to rotate the phone back to portrait before closing
+   the window.
+ - can call a layout callback when the window's rect has "settled"; during
+   initialization and orientation change, you can get some weird rect values
+   in the postlayout event listener; this filters out the noise so you can
+   easily lay out your interface based on the real width/height
+
+TU.UI.Views.GalleryView
+ - an image gallery view with a thumbnail view and a swipeable/zoomable
+   full-size image view (zooming on android requires the 
+   org.iotashan.TiTouchImageView module)
+
+TU.UI.Views.ModalView
+ - given a view, creates a modal overlay and displays the view
+
+TU.UI.Views.RemoteImageView
+ - the standard ImageView does not fire events properly for remote images
+   when ImageView is in a TableViewRow with touchEnabled=false;
+   if your app needs to know that the image has been loaded, you can use
+   this class instead; it isn't quite as smart as the ImageView, though --
+   the standard ImageView is smart enough to delay loading images until
+   the images are shown on screen.  RemoteImageView will attempt to load the
+   images immediately.
+
+TU.UI.Views.SelectBar
+ - a cross-platform group of selectable buttons
+
+TU.UI.Views.SimplePicker
+ - a cross-platform selection box with a popup list view
+
+TU.UI.Views.TextField
+ - a cross-platform text field that supports padding on android (standard
+   TextField doesn't support padding, leading to some ugly forms on android);
+   not 100% compatible with standard TextField; see example code.
+
+TU.UI.Views.ViewPager
+ - cross-platform viewpager (uses ScrollableView on iOS, net.bajawa.pager
+   on android)
+
+MIGRATING FROM VERSION 1.0
+
+ - set default units to dip in tiapp.xml
+
+ - LocationManager: instead of new TU.LocationManager, use 
+   TU.getLocationManager()
+
+ - Sizer: you don't need to use this much anymore; really only need it if you
+   need to perform a calculation like "what size image file would I want
+   to request from the server to fill a 300-dp ImageView at the display's
+   native resolution?"

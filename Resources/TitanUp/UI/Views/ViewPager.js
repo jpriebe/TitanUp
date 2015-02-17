@@ -394,8 +394,8 @@ function ViewPager (params)
                 return;
             }
 
+            updateTitleBar(e.to);
             _curr_idx = e.to;
-            updateTitleBar(_curr_idx);
             _self.fireEvent ('pagechange', { prevIndex: e.from, index: e.to });
         });
 

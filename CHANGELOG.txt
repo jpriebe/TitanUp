@@ -1,0 +1,21 @@
+-------------------------------------------------------------------------------
+Version 2.0.0
+-------------------------------------------------------------------------------
+
+- BIG CHANGES
+  - now expect app to set default unit to "dip"; Sizer is not as important anymore
+  - moving away from tab groups; the TGWM is not part of the demo anymore; instead, use a DrawerMenuWM
+
+- added TU.Logger, log functions that keep a circular buffer of log messages
+
+- added TU.Context, which tracks app pause/resume for android
+
+- TU.UI.Theme -- added more colors; added color manipulation and font size manipulation functions
+
+- added TU.UI.OAWindow, an orientation-aware window
+
+- added TU.UI.Views.RemoteImageView for proper event firing when loading remote images under certain circumstances
+
+- added TU.UI.Views.TextField which supports left/right padding on android
+
+- added TU.UI.ViewPager for a cross-platform view pager

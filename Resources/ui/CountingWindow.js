@@ -20,8 +20,6 @@ function CountingWindow ()
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderRadius: margin,
-		borderColor: TU.UI.Theme.textColor,
 		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
@@ -33,7 +31,7 @@ function CountingWindow ()
 		right: margin,
 		top: margin,
 		text: "Instance number " + _numInstances,
-        color: TU.UI.Theme.textColor,
+        color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.mediumBold
 	});
 	

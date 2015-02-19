@@ -210,14 +210,17 @@ function ViewPager (params)
 
                 _title_labels_bold.push (lb);
                 lv.add (lb);
-            }
 
-            // add click handler to jump right to a page
-            l.addEventListener ('click', function (idx) {
-                return function () {
-                    _sv.scrollToView (idx);
-                };
-            }(i));
+                // add click handler to jump right to a page
+                l.addEventListener ('click', function (idx) {
+                    return function () {
+                        if (_sv !== null)
+                        {
+                            _sv.scrollToView (idx);
+                        }
+                    };
+                }(i));
+            }
 
             x += _title_label_width;
         }
@@ -394,8 +397,8 @@ function ViewPager (params)
                 return;
             }
 
-            updateTitleBar(e.to);
             _curr_idx = e.to;
+            updateTitleBar(_curr_idx);
             _self.fireEvent ('pagechange', { prevIndex: e.from, index: e.to });
         });
 

@@ -1,5 +1,6 @@
 var TU = null;
 
+var force_low_priority_messages = false;
 
 var _buffer = {
     entries: [],
@@ -80,12 +81,26 @@ function handle_msg (msg)
 
 Logger.trace = function (msg)
 {
-    Ti.API.trace (handle_msg (msg));
+    if (force_low_priority_messages)
+    {
+        Ti.API.info (handle_msg ("TRACE " + msg));
+    }
+    else
+    {
+        Ti.API.trace (handle_msg (msg));
+    }
 };
 
 Logger.debug = function (msg)
 {
-    Ti.API.debug (handle_msg (msg));
+    if (force_low_priority_messages)
+    {
+        Ti.API.info (handle_msg ("DEBUG " + msg));
+    }
+    else
+    {
+        Ti.API.debug (handle_msg (msg));
+    }
 };
 
 Logger.info = function (msg)
@@ -101,6 +116,18 @@ Logger.warn = function (msg)
 Logger.error = function (msg)
 {
     Ti.API.error (handle_msg (msg));
+};
+
+/**
+ * By default, debug and trace messages will be dropped in production builds.  By
+ * setting force low priority messages to true, Logger will use Ti.API.info() calls
+ * on these low priority messages to make sure they appear in production builds.
+ *
+ * @param v
+ */
+Logger.setForceLowPriorityMessages = function (v)
+{
+    force_low_priority_messages = v;
 };
 
 /**

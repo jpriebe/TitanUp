@@ -147,7 +147,6 @@ function _init ()
 {
     if (!Ti.Geolocation.locationServicesEnabled)
     {
-        alert('Please enable location services');
         return;
     }
 

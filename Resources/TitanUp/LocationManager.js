@@ -17,6 +17,7 @@ var _listener_active = false;
 var _first_callback_complete = false;
 var _app_paused = false;
 var _timeout = null;
+var _purpose = 'To provide information tailored to your location.';
 
 var _update_callbacks = [];
 
@@ -203,7 +204,7 @@ function _init ()
         remove_listener ();
     });
 
-    Ti.Geolocation.purpose = 'Determine Current Location';
+    Ti.Geolocation.purpose = _purpose;
 
     // call once for a quick position update -- might be cached, but at least
     // you'll have something quick in case the user access location-dependent
@@ -229,11 +230,16 @@ LocationManager.getCoords = function ()
 /**
  * Initializes the LocationManager so you can start getting location data
  */
-LocationManager.init = function (desired_accuracy)
+LocationManager.init = function (desired_accuracy, purpose)
 {
     if (typeof desired_accuracy !== 'undefined')
     {
         _desired_accuracy = desired_accuracy;
+    }
+
+    if (typeof purpose !== 'undefined')
+    {
+        _purpose = purpose;
     }
 
     _init ();

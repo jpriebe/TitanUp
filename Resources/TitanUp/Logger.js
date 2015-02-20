@@ -1,6 +1,7 @@
 var TU = null;
 
-var force_low_priority_messages = false;
+var _force_low_priority_messages = false;
+var _callback = null;
 
 var _buffer = {
     entries: [],
@@ -81,7 +82,7 @@ function handle_msg (msg)
 
 Logger.trace = function (msg)
 {
-    if (force_low_priority_messages)
+    if (_force_low_priority_messages)
     {
         Ti.API.info (handle_msg ("TRACE " + msg));
     }
@@ -89,11 +90,16 @@ Logger.trace = function (msg)
     {
         Ti.API.trace (handle_msg (msg));
     }
+
+    if (_callback !== null)
+    {
+        _callback ('trace', msg);
+    }
 };
 
 Logger.debug = function (msg)
 {
-    if (force_low_priority_messages)
+    if (_force_low_priority_messages)
     {
         Ti.API.info (handle_msg ("DEBUG " + msg));
     }
@@ -101,21 +107,41 @@ Logger.debug = function (msg)
     {
         Ti.API.debug (handle_msg (msg));
     }
+
+    if (_callback !== null)
+    {
+        _callback ('debug', msg);
+    }
 };
 
 Logger.info = function (msg)
 {
     Ti.API.info (handle_msg (msg));
+
+    if (_callback !== null)
+    {
+        _callback ('info', msg);
+    }
 };
 
 Logger.warn = function (msg)
 {
     Ti.API.warn (handle_msg (msg));
+
+    if (_callback !== null)
+    {
+        _callback ('warn', msg);
+    }
 };
 
 Logger.error = function (msg)
 {
     Ti.API.error (handle_msg (msg));
+
+    if (_callback !== null)
+    {
+        _callback ('error', msg);
+    }
 };
 
 /**
@@ -127,8 +153,13 @@ Logger.error = function (msg)
  */
 Logger.setForceLowPriorityMessages = function (v)
 {
-    force_low_priority_messages = v;
+    _force_low_priority_messages = v;
 };
+
+Logger.setCallback = function (cb)
+{
+    _callback = cb;
+}
 
 /**
  * Turns on the log buffer so that the app can store and retrieve the most recent

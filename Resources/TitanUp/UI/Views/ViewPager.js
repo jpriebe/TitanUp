@@ -354,20 +354,29 @@ function ViewPager (params)
 
     function init_view_android ()
     {
-        var PagerModule = require("net.bajawa.pager");
+        var PagerModule = require("so.hau.tomas.pager");
 
         build_title_bar();
+
+        var pages = [];
+        for (var i = 0; i < _views.length; i++)
+        {
+            pages.push ({
+                title: "",
+                view: _views[i]
+            });
+        }
 
         var options = {
             top: _titleBarHeight,
             initialPage: _curr_idx,
-            data: _views,
+            pages: pages,
             tabs: {
                 style: PagerModule.MARKET,
                 lineColor: _underlineColor,
                 lineColorSelected: _underlineColor,
-                backgroundColor: _titleBarBackgroundColor,
-                backgroundColorSelected: _titleBarBackgroundColor
+                tabBackground: _titleBarBackgroundColor,
+                tabBackgroundSelected: _titleBarBackgroundColor
             }
         };
 
@@ -380,7 +389,7 @@ function ViewPager (params)
         if (_singleTitle)
         {
             options.tabs.padding = {
-                clip: 0 - TU.Device.getDisplayWidth ()
+                paddingClip : 0 - TU.Device.getDisplayWidth ()
             };
             options.tabs.lineHeightSelected = 0;
         }

@@ -471,7 +471,7 @@ function GalleryViewImagePager (params) {
 
     function load_content_android ()
     {
-        var PagerModule = require("net.bajawa.pager");
+        var PagerModule = require("so.hau.tomas.pager");
 
         if (_curr_page_index != -1)
         {
@@ -482,11 +482,20 @@ function GalleryViewImagePager (params) {
             _curr_page_index = _effective_start_index;
         }
 
+        var pages = [];
+        for (var i = 0; i < _views.length; i++)
+        {
+            pages.push ({
+                title: "",
+                view: _views[i]
+            });
+        }
+
         var options = {
             top: 0,
             bottom: _pager_bottom,
             initialPage: _curr_page_index,
-            data: _views
+            pages: pages
         };
 
         _vp = PagerModule.createViewPager(options);

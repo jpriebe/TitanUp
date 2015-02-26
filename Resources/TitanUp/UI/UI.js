@@ -46,6 +46,14 @@ UI.EventThrottle = function ()
 	
 };
 
+UI.runRateAppAlert = function (params)
+{
+    var RateAppAlert = require ('/TitanUp/UI/RateAppAlert');
+    RateAppAlert.TUInit (TU);
+
+    RateAppAlert.run (params);
+};
+
 UI.createModalView = function (params)
 {
     var ModalView = require ('/TitanUp/UI/Views/ModalView');
@@ -176,6 +184,29 @@ UI.openWindow = function (w)
     }
 
     _curr_wm.TUopenWindow (w);
+};
+
+UI.closeAllWindows = function (cb)
+{
+    function recursive_close ()
+    {
+        var w = UI.getActiveWindow ();
+        w.addEventListener ('close', function () {
+            if (_window_stack.length == 0)
+            {
+                if (typeof cb !== 'undefined')
+                {
+                    cb ();
+                }
+                return;
+            }
+
+            recursive_close ();
+        });
+        UI.closeWindow (w);
+    }
+
+    recursive_close ();
 };
 
 UI.closeWindow = function (w)

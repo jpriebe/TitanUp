@@ -159,7 +159,7 @@ Logger.setForceLowPriorityMessages = function (v)
 Logger.setCallback = function (cb)
 {
     _callback = cb;
-}
+};
 
 /**
  * Turns on the log buffer so that the app can store and retrieve the most recent

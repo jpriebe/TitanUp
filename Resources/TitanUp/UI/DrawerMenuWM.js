@@ -20,6 +20,9 @@ function DrawerMenuWM (params)
     var _ios_options = {};
     var _menu_items = [];
     var _byo_menu = false;   // is the caller supplying a menu via params.left_menu_view ???
+    var _menu_button_accessibility_label = 'Main Menu';
+    var _back_button_accessibility_label = 'Back';
+
 
     if (typeof params === 'undefined')
     {
@@ -63,6 +66,19 @@ function DrawerMenuWM (params)
         _ios_options.left_nav_buttons = [];
     }
 
+    if (typeof params.menu_button_accessibility_label !== 'undefined')
+    {
+        _menu_button_accessibility_label = params.menu_button_accessibility_label;
+        delete params.menu_button_accessibility_label;
+    }
+
+    if (typeof params.back_button_accessibility_label !== 'undefined')
+    {
+        _back_button_accessibility_label = params.back_button_accessibility_label;
+        delete params.back_button_accessibility_label;
+    }
+
+
     // this is mandatory
     if (params.main_view)
     {
@@ -101,22 +117,15 @@ function DrawerMenuWM (params)
 
         set_win_params (params);
 
-        var _left_menu_win = Ti.UI.createWindow ({
-            left: 0 - _left_menu_width,
-            width: _left_menu_width,
-            backgroundColor: _win_params.barColor,  // we want our menu window's bg to match the bar color
-            statusBarStyle: Titanium.UI.iPhone.StatusBar.LIGHT_CONTENT
-        });
+        _left_menu_view.setZIndex (100000);
+        _left_menu_view.setLeft (0 - _left_menu_width);
 
-        _left_menu_win.addEventListener ('swipe', function (e) {
+        _left_menu_view.addEventListener ('swipe', function (e) {
             if (e.direction == 'left')
             {
                 hide_left_menu ();
             }
         });
-
-        _left_menu_win.add (_left_menu_view);
-        _left_menu_win.open ();
 
         for (var k in _win_params)
         {
@@ -127,51 +136,21 @@ function DrawerMenuWM (params)
         var _main_win = Ti.UI.createWindow (params);
         _main_win.add (_main_view);
 
-        /**
-         * this code would allow you to open with a swipe to the right. The main problem is this:
-         * we can't reliably determine that you've started your swipe near the left edge
-         * of the screen.  Touchstart doesn't reliably give an x coordinate when the user
-         * touches down in a tableview.
-        _last_touch_x = 0;
-        _main_win.addEventListener ('touchstart', function (e) {
-            TU.Logger.info ('[DrawerMenuWM] touchstart, e.x: ' + e.x + ' (type: ' + (typeof e.x) + ')');
-            _last_touch_x = e.x;
-        });
+        // ideally, we would use a Ti.UI.Button, but there are a few problems:
+        //  - accessibility label is ignored on button in NavBar (https://jira.appcelerator.org/browse/TIMOB-15418)
+        //  - on iOS 6, the button has a 3D border with a gradient, no matter how I try to control for that
+        // so we use an ImageView; the big drawback is that VoiceOver will say "main menu - image" instead of
+        // "main menu - button".
 
-        // sometimes touchstart returns e.x undefined (something to do with
-        // events in tableviews...  so we'll try to catch most of these in
-        // touchmove events...
-        _main_win.addEventListener ('touchmove', function (e) {
-            TU.Logger.info ('[DrawerMenuWM] touchmove, e.x: ' + e.x);
-            if (typeof _last_touch_x === 'undefined')
-            {
-                _last_touch_x = e.x;
-            }
-        });
-
-        _main_win.addEventListener ('swipe', function (e) {
-            TU.Logger.info ('[DrawerMenuWM] swipe, _last_touch_x: ' + _last_touch_x + ', e.direction: ' + e.direction);
-            if (_last_touch_x < 24)
-            {
-                if (e.direction == 'right')
-                {
-                    show_left_menu ();
-                }
-            }
-        });
-        */
-
-
-        // use imageview for button instead of button so that it is flat
-        var _menu_btn = Ti.UI.createImageView({
-            image: (TU.Device.getiOS7Plus()) ? '/images/menu_indicator-ios7.png' : '/images/menu_indicator.png',
+        var menu_btn = Ti.UI.createImageView ({
+            image: (TU.Device.getiOS7Plus() ? '/images/menu_indicator-ios7.png' : '/images/menu_indicator.png'),
             width: 24,
             height: 24,
-            left: 4
+            accessibilityLabel: _menu_button_accessibility_label
         });
 
         var navbtns = [];
-        navbtns.push (_menu_btn);
+        navbtns.push (menu_btn);
         for (var i = 0; i < _ios_options.left_nav_buttons.length; i++)
         {
             navbtns.push (_ios_options.left_nav_buttons[i]);
@@ -185,11 +164,12 @@ function DrawerMenuWM (params)
 
         _overlay = Ti.UI.createView ({
             backgroundColor: '#000',
-            opacity: '0.5',
+            opacity: 0,
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0
+            bottom: 0,
+            zIndex: _left_menu_view.getZIndex() - 1
         });
 
         _overlay.addEventListener ('swipe', function (e) {
@@ -247,17 +227,18 @@ function DrawerMenuWM (params)
                 return;
             }
 
-            _main_view.add (_overlay);
-
             _left_menu_showing = true;
-            _left_menu_win.animate ({
-                left: 0,
+
+            _main_view.add (_overlay);
+            _main_view.add (_left_menu_view);
+
+            _overlay.animate ({
+                opacity: 0.5,
                 curve: Ti.UI.ANIMATION_CURVE_EASE_OUT,
                 duration: 300
             });
-            _self.animate ({
-                left: _left_menu_width,
-                right: 0 - _left_menu_width,
+            _left_menu_view.animate ({
+                left: 0,
                 curve: Ti.UI.ANIMATION_CURVE_EASE_OUT,
                 duration: 300
             });
@@ -270,20 +251,27 @@ function DrawerMenuWM (params)
                 return;
             }
 
-            _main_view.remove (_overlay);
-
             _left_menu_showing = false;
-            _left_menu_win.animate ({
-                left: 0 - _left_menu_width,
-                curve: Ti.UI.ANIMATION_CURVE_EASE_OUT,
-                duration: 300
-            });
-            _self.animate ({
-                left: 0,
-                right: 0,
-                curve: Ti.UI.ANIMATION_CURVE_EASE_OUT,
-                duration: 300
-            });
+
+            _overlay.animate ({
+                    opacity: 0,
+                    curve: Ti.UI.ANIMATION_CURVE_EASE_OUT,
+                    duration: 300
+                },
+                function () {
+                    _main_view.remove (_overlay);
+                }
+            );
+
+            _left_menu_view.animate ({
+                    left: 0 - _left_menu_width,
+                    curve: Ti.UI.ANIMATION_CURVE_EASE_OUT,
+                    duration: 300
+                },
+                function () {
+                    _main_view.remove (_left_menu_view);
+                }
+            );
         }
 
         function on_open ()
@@ -292,7 +280,7 @@ function DrawerMenuWM (params)
             // listener: http://developer.appcelerator.com/question/125494/inexplicable-bug-toolbar-button-only-listens-4-clicks
             // In our case, the click event never fired when we tried to add it immediately after
             // creating the menu button.
-            _menu_btn.addEventListener('click',function() {
+            menu_btn.addEventListener('click',function() {
                 if (_left_menu_showing)
                 {
                     hide_left_menu ();
@@ -338,12 +326,17 @@ function DrawerMenuWM (params)
         // to TUopenWindow() (the TU.UI.openWindow() function knows to call TUopenWindow())
         _self.TUopenWindow = function (w)
         {
-            //w.backButtonTitleImage = '/images/icon-back.png';
+            // ideally, we would use a Ti.UI.Button, but there are a few problems:
+            //  - accessibility label is ignored on button in NavBar (https://jira.appcelerator.org/browse/TIMOB-15418)
+            //  - on iOS 6, the button has a 3D border with a gradient, no matter how I try to control for that
+            // so we use an ImageView; the big drawback is that VoiceOver will say "main menu - image" instead of
+            // "main menu - button".
 
-            // use imageview for button instead of button so that it is flat
-            var back_btn = Ti.UI.createImageView({
-                image: (TU.Device.getiOS7Plus()) ? '/images/icon-back-ios7.png' : '/images/icon-back.png'
+            var back_btn = Ti.UI.createImageView ({
+                image: (TU.Device.getiOS7Plus() ? '/images/icon-back-ios7.png' : '/images/icon-back.png'),
+                accessibilityLabel: _back_button_accessibility_label
             });
+
             w.leftNavButtons = [back_btn];
 
             // can't add the click event listener until the window is open, or it won't fire
@@ -373,9 +366,12 @@ function DrawerMenuWM (params)
         {
             _main_win.remove (_main_view);
 
-            if (typeof _main_win.titleControl !== 'undefined')
+            if (typeof title !== 'undefined')
             {
-                _main_win.titleControl.text = title;
+                if (typeof _main_win.titleControl !== 'undefined')
+                {
+                    _main_win.titleControl.text = title;
+                }
             }
 
             _main_view = v;
@@ -384,18 +380,16 @@ function DrawerMenuWM (params)
         
         _self.replaceMenuOptions = function (menu_items)
         {
+            hide_left_menu();
+
             _menu_items = menu_items;
-            _left_menu_win.remove (_left_menu_view);
             _left_menu_view = DrawerMenuWM.build_menu (_menu_items, JSON.parse (JSON.stringify (_menu_params)));
             _self.register_event_listener ();
-        
-            _left_menu_win.add (_left_menu_view);
         };
 
         _self.setMenuWidth = function (width)
         {
             _left_menu_width = width;
-            _left_menu_win.width = _left_menu_width;
             show_left_menu();
         };
     }
@@ -506,8 +500,13 @@ function DrawerMenuWM (params)
         _self.replaceView = function (v, title)
         {
         	TU.Logger.debug ('[DrawerMenuWM] replacing view; setting title to "' + title + '"');
+
+            if (typeof title !== 'undefined')
+            {
+                _self.title = title;
+            }
+
             d.centerView = v;
-            _self.title = title;
         };
         
         _self.replaceMenuOptions = function (menu_items)
@@ -558,23 +557,6 @@ DrawerMenuWM.build_menu = function (menu_items, params)
     var background_color = 'black';
     var separator_color = 'transparent';
     var width = 0;
-
-    if (TU.Device.getOS() == 'ios')
-    {
-        if (TU.Device.getiOS7Plus())
-        {
-            top = 66;
-        }
-        else
-        {
-            top = 44;
-        }
-
-        if (Ti.Gesture.isLandscape ())
-        {
-            top -= 12;
-        }
-    }
 
     if (typeof params.color !== 'undefined')
     {

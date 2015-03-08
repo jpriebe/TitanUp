@@ -119,6 +119,13 @@ function ViewPager (params)
             init_view_android ();
         }
 
+        _self.addEventListener ('beforeRemove', function (e) {
+            for (var i = 0; i < _views.length; i++)
+            {
+                TU.UI.removeView (_views[i]);
+            }
+        });
+
         _self.xgetTitleBar = function ()
         {
             return _title_bar;

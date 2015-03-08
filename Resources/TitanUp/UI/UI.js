@@ -146,6 +146,51 @@ UI.createRemoteImageView = function (params)
 UI.Theme = require ('/TitanUp/UI/Theme');
 UI.Sizer = require ('/TitanUp/UI/Sizer');
 
+/* View management */
+UI.addView = function (child, parent)
+{
+    parent.add (child);
+
+    child.fireEvent ('added', {
+        child: child,
+        parent: parent
+    });
+};
+
+/**
+ * Removes a child view from a parent, firing beforeRemove and afterRemove events to the child,
+ * so it can deregister itself and/or its children from data services, event listeners, etc.
+ *
+ * If the parent is not specified, only the beforeRemove event will fire, and obviously, the
+ * removal will not actually happen.
+ *
+ * @param {Ti.UI.View} child
+ * @param {Ti.UI.View} parent
+ */
+UI.removeView = function (child, parent)
+{
+    child.fireEvent ('beforeRemove', {
+        child: child,
+        parent: parent,
+        bubbles: false
+    });
+
+    if (typeof parent === 'undefined')
+    {
+        return;
+    }
+
+    parent.remove (child);
+
+    child.fireEvent ('afterRemove', {
+        child: child,
+        parent: parent,
+        bubbles: false
+    });
+};
+
+/* Window management */
+
 UI.getActiveWindow = function ()
 {
     TU.Logger.debug ('[TitanUp.UI] getActiveWindow() - window_stack.length: ' + _window_stack.length);
@@ -223,6 +268,8 @@ UI.closeWindow = function (w)
     }
 };
 
+/* navbar management */
+
 UI.hide_navbar = function ()
 {
     var w = TU.UI.getActiveWindow ();
@@ -276,6 +323,8 @@ UI.show_navbar = function ()
 
     return false;
 };
+
+/* initialization */
 
 UI.TUInit = function (tu)
 {

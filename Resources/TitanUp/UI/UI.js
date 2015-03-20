@@ -96,6 +96,15 @@ UI.createGalleryView = function (params)
 	return new GalleryView (params);
 };
 
+UI.createTabView = function (params)
+{
+    var TabView = require ('/TitanUp/UI/Views/TabView');
+    TabView.TUInit (TU);
+
+    return new TabView (params);
+};
+
+
 UI.createTGWM = function ()
 {
     var TGWM = require ('/TitanUp/UI/TGWM');

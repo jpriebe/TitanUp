@@ -79,6 +79,14 @@ UI.createSimplePicker = function (params)
 	return new SimplePicker (params);
 };
 
+UI.createCircularProgressBar = function (params)
+{
+    var CircularProgressBar = require ('/TitanUp/UI/Views/CircularProgressBar');
+    CircularProgressBar.TUInit (TU);
+
+    return new CircularProgressBar (params);
+};
+
 
 UI.createSelectBar = function (params)
 {

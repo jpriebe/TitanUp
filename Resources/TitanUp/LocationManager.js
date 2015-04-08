@@ -188,13 +188,13 @@ function _init ()
     // note that these don't work on android without help from something like
     // bencoding.android.tools or our TitanUp/Context tracking
     Ti.App.addEventListener('resumed', function () {
-        TU.Logger.debug ("[TitanUp.LocationManager] event: resumed");
+        TU.Logger.info ("[TitanUp.LocationManager] event: resumed");
         _app_paused = false;
         add_listener ();
     });
 
     Ti.App.addEventListener('paused', function () {
-        TU.Logger.debug ("[TitanUp.LocationManager] event: paused");
+        TU.Logger.info ("[TitanUp.LocationManager] event: paused");
         _app_paused = true;
         if (_timeout != null)
         {

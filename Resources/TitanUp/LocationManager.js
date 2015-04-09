@@ -104,15 +104,16 @@ function callback (e)
     else
     {
         _coords = e.coords;
-        TU.Logger.info("[TitanUp.LocationManager]"
-            + " lat,lon: " + e.coords.latitude + ", " + e.coords.longitude
-            + "; accuracy: " + e.coords.accuracy
-            + "; timestamp: " + e.coords.timestamp);
 
         check_update_callbacks ();
 
         if (e.coords.accuracy <= _desired_accuracy)
         {
+            TU.Logger.info("[TitanUp.LocationManager]"
+                + " lat,lon: " + e.coords.latitude + ", " + e.coords.longitude
+                + "; accuracy: " + e.coords.accuracy
+                + "; timestamp: " + e.coords.timestamp);
+
             // save this for later
             Ti.App.Properties.setObject ('Location.last_coords', _coords);
 

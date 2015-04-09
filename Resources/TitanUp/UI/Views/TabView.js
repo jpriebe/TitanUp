@@ -157,8 +157,7 @@ function TabView (params)
             var l = Ti.UI.createLabel ({
                 font: _tab_font,
                 color: _tab_color,
-                text: _tab_labels[i],
-                touchEnabled: false
+                text: _tab_labels[i]
             });
 
             tab.label = l;
@@ -166,19 +165,24 @@ function TabView (params)
 
             tab.idx = i;
 
-            //tab.addEventListener ('click', on_tab_click);
+            function addEventListeners (t)
+            {
+                tab.addEventListener('touchstart', function (e) {
+                    t.label.setColor (_tab_color_active);
+                    t.setBackgroundColor (_tab_background_color_active);
+                });
 
-            tab.addEventListener('touchstart', function (e) {
-                e.source.label.setColor (_tab_color_active);
-                e.source.setBackgroundColor (_tab_background_color_active);
-            });
+                tab.addEventListener('touchend', function (e) {
+                    select_tab (t.idx);
+                });
 
-            tab.addEventListener('touchend', on_tab_click);
+                tab.addEventListener('touchcancel', function (e) {
+                    t.label.setColor (_tab_color);
+                    t.setBackgroundColor (_tab_background_color);
+                });
+            }
 
-            tab.addEventListener('touchcancel', function (e) {
-                e.source.label.setColor (_tab_color);
-                e.source.setBackgroundColor (_tab_background_color);
-            });
+            addEventListeners (tab);
 
             _tabs.push (tab);
             _tab_bar.add (tab);
@@ -223,21 +227,7 @@ function TabView (params)
             }
 
             return _panels[idx];
-        }
-    }
-
-    function on_tab_click (e)
-    {
-        if (typeof e.source === 'undefined')
-        {
-            return;
-        }
-        if (typeof e.source.idx === 'undefined')
-        {
-            return;
-        }
-
-        select_tab (e.source.idx);
+        };
     }
 
     function select_tab (idx)

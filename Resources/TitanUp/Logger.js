@@ -55,17 +55,26 @@ function Logger ()
 function format_ts ()
 {
     var now = new Date(),
-        pad = function(num) {
+        pad2 = function(num) {
             var norm = Math.abs(Math.floor(num));
             return (norm < 10 ? '0' : '') + norm;
+        },
+        pad3 = function(num) {
+            var norm = Math.abs(Math.floor(num));
+            if (norm < 10)
+            {
+                return '00' + norm;
+            }
+            return (norm < 100 ? '0' : '') + norm;
         };
+
     return now.getFullYear()
-    + '-' + pad(now.getMonth()+1)
-    + '-' + pad(now.getDate())
-    + ' ' + pad(now.getHours())
-    + ':' + pad(now.getMinutes())
-    + ':' + pad(now.getSeconds())
-    + '.' + now.getMilliseconds();
+        + '-' + pad2(now.getMonth()+1)
+        + '-' + pad2(now.getDate())
+        + ' ' + pad2(now.getHours())
+        + ':' + pad2(now.getMinutes())
+        + ':' + pad2(now.getSeconds())
+        + '.' + pad3(now.getMilliseconds());
 }
 
 function handle_msg (msg)

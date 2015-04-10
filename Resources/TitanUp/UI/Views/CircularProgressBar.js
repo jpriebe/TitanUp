@@ -91,7 +91,7 @@ function CircularProgressBar (params)
         }
         if (typeof params.borderRadius === 'undefined')
         {
-            params.borderRadius = (_config.size + _config.margin) / 2 * (Ti.Platform.displayCaps.logicalDensityFactor || 1)
+            params.borderRadius = (_config.size + _config.margin) / 2 * (Ti.Platform.displayCaps.logicalDensityFactor || 1);
         }
     }
 

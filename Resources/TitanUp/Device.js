@@ -6,6 +6,7 @@ var _platformName = '';
 var _dc = null;
 
 // expose these
+var _model = '';
 var _defaultunit = '';
 var _os = 'unknown';
 var _workingWidth = 0;
@@ -15,8 +16,12 @@ var _dpi = 0;
 var _isTablet = false;
 var _screensize = 0;
 
+var _iphone_level = -1;
+var _ipad_level = -1;
+
 var _ios7plus = false;
 var _android4plus = false;
+
 var _has_google_play_services = false;
 
 function Device () 
@@ -29,18 +34,31 @@ function initialize ()
     _defaultunit = Ti.App.Properties.getString ('ti.ui.defaultunit', 'system');
     _osname = Ti.Platform.osname;
     _platformName = Ti.Platform.name;
+    _model = Ti.Platform.model;
 
-    if (_platformName=== 'iPhone OS')
+    if (_platformName === 'iPhone OS')
     {
         _os = 'ios';
 
-        var version = Titanium.Platform.version.split(".");
+        var version = Ti.Platform.version.split(".");
         var major = parseInt(version[0],10);
 
         // Can only test this support on a 3.2+ device
         if (major >= 7)
         {
             _ios7plus = true;
+        }
+
+        var results = _model.match (/iphone(\d+),(\d+)/i);
+        if (results)
+        {
+            _iphone_level = results[1];
+        }
+
+        results = _model.match (/ipad(\d+),(\d+)/i);
+        if (results)
+        {
+            _ipad_level = results[1];
         }
     }
     else if (_platformName === "android")
@@ -117,6 +135,35 @@ function initialize ()
 Device.getOS = function ()
 {
 	return _os;
+};
+
+/**
+ * Gets the model name of the device
+ * @returns {string}
+ */
+Device.getModel = function ()
+{
+    return _model;
+};
+
+/**
+ * Gets the major value of the iphone model number (e.g. iphone 6 is "7,2"; this function returns 7);
+ * If device is not an iphone, returns -1.
+ * @returns {number}
+ */
+Device.getIphoneLevel = function ()
+{
+    return _iphone_level;
+};
+
+/**
+ * Gets the major value of the ipad model number (e.g. iphone 6 is "7,2"; this function returns 7);
+ * If device is not an ipad, returns -1.
+ * @returns {number}
+ */
+Device.getIpadLevel = function ()
+{
+    return _ipad_level;
 };
 
 /**

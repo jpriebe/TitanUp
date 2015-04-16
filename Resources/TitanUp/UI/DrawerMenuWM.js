@@ -377,7 +377,16 @@ function DrawerMenuWM (params)
             _main_view = v;
             _main_win.add (v);
         };
-        
+
+        _self.replaceLeftView = function (v)
+        {
+            _left_menu_view = null;
+            _left_menu_view = v;
+            _left_menu_view.setZIndex (100000);
+            _left_menu_view.setLeft (0 - _left_menu_width);
+            _self.register_event_listener ();
+        };
+
         _self.replaceMenuOptions = function (menu_items)
         {
             hide_left_menu();
@@ -507,6 +516,13 @@ function DrawerMenuWM (params)
             }
 
             d.centerView = v;
+        };
+
+        _self.replaceLeftView = function (v)
+        {
+            d.leftView = v;
+            _left_menu_view = v;
+            _self.register_event_listener();
         };
         
         _self.replaceMenuOptions = function (menu_items)

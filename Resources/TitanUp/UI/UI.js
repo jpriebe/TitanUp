@@ -341,6 +341,23 @@ UI.show_navbar = function ()
     return false;
 };
 
+
+/**
+ * Gets the orientation of the user interface, regardless of the physical orientation
+ * of the device.
+ */
+UI.getUIOrientation = function ()
+{
+    if (Ti.Platform.displayCaps.platformWidth < Ti.Platform.displayCaps.platformHeight)
+    {
+        return 'portrait';
+    }
+    else
+    {
+        return 'landscape';
+    }
+};
+
 /* initialization */
 
 UI.TUInit = function (tu)

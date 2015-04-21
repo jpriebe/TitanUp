@@ -112,16 +112,9 @@ function OAWindow (params)
     function checklayout ()
     {
         var expected_orientation = _supportedOrientations;
-        if (expected_orientation == 'all')
+        if (expected_orientation === 'all')
         {
-            if (Ti.Gesture.isLandscape ())
-            {
-                expected_orientation = 'landscape';
-            }
-            else
-            {
-                expected_orientation = 'portrait';
-            }
+            expected_orientation = TU.UI.getUIOrientation();
         }
 
         TU.Logger.debug ("[OAWindow] checklayout(); supported orientations: " + _supportedOrientations + "; expected orientation: " + expected_orientation);
@@ -286,13 +279,6 @@ function OAWindow (params)
                 Ti.Gesture.removeEventListener ('orientationchange', onorientationchange);
             });
         }
-
-        /*
-        if (_layoutCallback != null)
-        {
-            _self.addEventListener ('postlayout', onpostlayout);
-        }
-        */
 
         _self.addEventListener ('postlayout', onpostlayout);
     }

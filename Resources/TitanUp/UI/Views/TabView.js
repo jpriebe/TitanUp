@@ -7,6 +7,7 @@ function TabView (params)
     var _tab_bar = null;
     var _tabs = [];
     var _panels = [];
+    var _content_views = [];
 
     var _current_panel_idx = -1;
     
@@ -195,6 +196,8 @@ function TabView (params)
             });
 
             _panels.push (panel);
+
+            _content_views.push (null);
         }
 
         _self.add (_tab_bar);
@@ -214,6 +217,8 @@ function TabView (params)
 
         _self.add (panel_view);
 
+        _self.onBeforeRemove = onBeforeRemove;
+
         setTimeout (function () {
             // do this in a timeout so that the view can be created and an event listener added
             // before we select the first tab...
@@ -228,6 +233,45 @@ function TabView (params)
 
             return _panels[idx];
         };
+
+        _self.add_content_view = function (idx, v) {
+            TU.Logger.debug ("[TabView] set_content_view (" + idx + ")");
+            if ((idx < 0) || (idx > _content_views.length - 1))
+            {
+                TU.Logger.debug ("[TabView] set_content_view (" + idx + ")");
+                return;
+            }
+
+            if (_content_views[idx] !== null)
+            {
+                TU.UI.removeView (_content_views[idx], _panels[idx]);
+                _content_views[idx] = null;
+            }
+
+            _panels[idx].add (v);
+            _content_views[idx] = v;
+        };
+    }
+
+    function onBeforeRemove (e)
+    {
+        for (var i = 0; i < _content_views.length; i++)
+        {
+            var v = _content_views[i];
+            if (v === null)
+            {
+                continue;
+            }
+
+            var p = _panels[i];
+            if (p === null)
+            {
+                // shouldn't happen
+                continue;
+            }
+
+            TU.UI.removeView (v, p);
+        }
     }
 
     function select_tab (idx)

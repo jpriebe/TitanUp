@@ -178,6 +178,10 @@ UI.addView = function (child, parent)
  * Removes a child view from a parent, firing beforeRemove and afterRemove events to the child,
  * so it can deregister itself and/or its children from data services, event listeners, etc.
  *
+ * If the child exposes a function called 'onBeforeRemove', that function will be called before
+ * the event is fired.  This has the advantage of being an immediate call, versus the possible
+ * delay before the event listener would be called.
+ *
  * If the parent is not specified, only the beforeRemove event will fire, and obviously, the
  * removal will not actually happen.
  *
@@ -186,11 +190,17 @@ UI.addView = function (child, parent)
  */
 UI.removeView = function (child, parent)
 {
-    child.fireEvent ('beforeRemove', {
+    var e = {
         child: child,
         parent: parent,
         bubbles: false
-    });
+    };
+
+    if (typeof child.onBeforeRemove === 'function')
+    {
+        child.onBeforeRemove (e);
+    }
+    child.fireEvent ('beforeRemove', e);
 
     if (typeof parent === 'undefined')
     {
@@ -199,11 +209,11 @@ UI.removeView = function (child, parent)
 
     parent.remove (child);
 
-    child.fireEvent ('afterRemove', {
-        child: child,
-        parent: parent,
-        bubbles: false
-    });
+    if (typeof child.onAfterRemove === 'function')
+    {
+        child.onAfterRemove (e);
+    }
+    child.fireEvent ('afterRemove', e);
 };
 
 /* Window management */

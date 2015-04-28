@@ -1,13 +1,12 @@
 var TU = null;
 
 /**
- * A class that makes a simple cross-platform picker.  On Android, it is a standard drop-down.
- * On iOS, it is a button that brings up a popup picker.
+ * A class that makes a simple cross-platform picker.
  * 
  * Fires event: 'change' event object contains properties 'value', 'caption', and 'index'
  */
 
-var _is_android = false;
+var _os = '';
 
 function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values, selected_value)
 {
@@ -40,25 +39,68 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
         _self.fireEvent ('cancel', {});
     });
 
+    function build_tvr (v)
+    {
+        var tvrparams = null;
+
+        // couple of interesting things going on here:
+        // - android and ios have inconsistent names for the color of a row that is being touched
+        // - android doesn't let you set the color of the text in a row that is being touched
+        // - android doesn't implement TableViewRow.setColor()
+        //
+        // so for android, we will explicitly create a label to put in the row.  To indicate the
+        // current selection, we can change the color of that label.  Note that we can't change
+        // these colors out while the user is touching the row; touch events don't seem to fire
+        // consistently.  So we just use that color to indicate the current selection before
+        // and after touch events.  Hope this makes sense.
+
+        if (_os === 'ios')
+        {
+            tvrparams = {
+                title: v,
+                color: color,
+                font: TU.UI.Theme.fonts.medium,
+                selectedBackgroundColor: highlight_bgcolor,  // note this property name is inconsistent with android
+                selectedColor: highlight_color
+            };
+
+            return tvrparams;
+        }
+
+
+        if (_os !== 'android')
+        {
+            throw {
+                message: 'Error: os not supported by SimplePicker'
+            };
+        }
+
+        tvrparams = {
+            backgroundSelectedColor: highlight_bgcolor  // note this property name is inconsistent with ios
+        };
+
+        var tvr = Ti.UI.createTableViewRow (tvrparams);
+
+        var l = Ti.UI.createLabel ({
+            left: 8,
+            text: v,
+            color: color,
+            font: TU.UI.Theme.fonts.medium
+        });
+
+        tvr.add (l);
+
+        tvr.label = l;
+
+        return tvr;
+    }
+
     var data = [];
 	for (var i = 0; i < _values.length; i++)
 	{
-        var tvrparams = {
-            title: _values[i],
-            color: color,
-            font: TU.UI.Theme.fonts.medium
-        };
+        var tvr = build_tvr (_values[i]);
 
-        if (TU.Device.getOS() == 'ios')
-        {
-            tvrparams.selectedBackgroundColor = highlight_bgcolor;
-        }
-        if (TU.Device.getOS() == 'android')
-        {
-            tvrparams.backgroundSelectedColor = highlight_bgcolor;
-        }
-
-		data.push (tvrparams);
+		data.push (tvr);
 	}
 
     var tvparams = {
@@ -105,7 +147,12 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
         if (_selidx > -1)
         {
             _tv_rows[_selidx].setBackgroundColor ('transparent');
-            if (!_is_android)
+
+            if (_os === 'android')
+            {
+                _tv_rows[_selidx].label.setColor (color);
+            }
+            else
             {
                 _tv_rows[_selidx].setColor (color);
             }
@@ -117,7 +164,12 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
 	        {
 	        	_selidx = i;
                 _tv_rows[i].setBackgroundColor (highlight_bgcolor);
-                if (!_is_android)
+
+                if (_os === 'android')
+                {
+                    _tv_rows[i].label.setColor (highlight_color);
+                }
+                else
                 {
                     _tv_rows[i].setColor (highlight_color);
                 }
@@ -292,7 +344,8 @@ function SimplePicker (params)
 SimplePicker.TUInit = function (tu)
 {
 	TU = tu;
-    _is_android = (TU.Device.getOS () == 'android');
+
+    _os = TU.Device.getOS();
 };
 
 

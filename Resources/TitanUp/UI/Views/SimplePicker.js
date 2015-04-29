@@ -15,9 +15,11 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
 	var _values = values;
 	var _value = '';
 	var _selidx = -1;
-	
-	var _tv_values = null;
-    var _tv_rows = null;
+
+    var _rowheight = 48;
+
+	var _sv = null;
+    var _rows = null;
 	var _btn_cancel = null;
 
 	var params = {
@@ -39,99 +41,77 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
         _self.fireEvent ('cancel', {});
     });
 
-    function build_tvr (v)
+    function build_row (i)
     {
-        var tvrparams = null;
-
-        // couple of interesting things going on here:
+        // a couple of things about TableViews and TableViewRows make them unsuitable for use here,
+        // so we are rolling our own "poor man's tableview"
         // - android and ios have inconsistent names for the color of a row that is being touched
         // - android doesn't let you set the color of the text in a row that is being touched
         // - android doesn't implement TableViewRow.setColor()
-        //
-        // so for android, we will explicitly create a label to put in the row.  To indicate the
-        // current selection, we can change the color of that label.  Note that we can't change
-        // these colors out while the user is touching the row; touch events don't seem to fire
-        // consistently.  So we just use that color to indicate the current selection before
-        // and after touch events.  Hope this makes sense.
 
-        if (_os === 'ios')
-        {
-            tvrparams = {
-                title: v,
-                color: color,
-                font: TU.UI.Theme.fonts.medium,
-                selectedBackgroundColor: highlight_bgcolor,  // note this property name is inconsistent with android
-                selectedColor: highlight_color
-            };
-
-            return tvrparams;
-        }
-
-
-        if (_os !== 'android')
-        {
-            throw {
-                message: 'Error: os not supported by SimplePicker'
-            };
-        }
-
-        tvrparams = {
-            backgroundSelectedColor: highlight_bgcolor  // note this property name is inconsistent with ios
-        };
-
-        var tvr = Ti.UI.createTableViewRow (tvrparams);
+        var row = Ti.UI.createView ({
+            top: 0,
+            left: 0,
+            right: 0,
+            height: _rowheight,
+            backgroundColor: bgcolor
+        });
 
         var l = Ti.UI.createLabel ({
             left: 8,
-            text: v,
+            text: _values[i],
             color: color,
             font: TU.UI.Theme.fonts.medium
         });
 
-        tvr.add (l);
+        row.add (l);
 
-        tvr.label = l;
+        row.label = l;
+        row.index = i;
 
-        return tvr;
+        row.addEventListener ('touchstart', function (e) {
+            row.setBackgroundColor (highlight_bgcolor);
+            row.label.setColor (highlight_color);
+        });
+
+        row.addEventListener ('touchcancel', function (e) {
+            row.setBackgroundColor (bgcolor);
+            row.label.setColor (color);
+        });
+
+        row.addEventListener ('touchend', function (e) {
+            row.setBackgroundColor (bgcolor);
+            row.label.setColor (color);
+        });
+
+        row.addEventListener ('click', function (e) {
+            var v = _values[row.index];
+            _value = v;
+            _self.fireEvent ('done', { index: row.index, value: v });
+        });
+
+        return row;
     }
 
-    var data = [];
-	for (var i = 0; i < _values.length; i++)
-	{
-        var tvr = build_tvr (_values[i]);
-
-		data.push (tvr);
-	}
-
-    var tvparams = {
-        data: data,
+    _sv = Ti.UI.createScrollView ({
         top: 8,
         left: 8,
         right: 8,
         bottom: 56,
-        allowSelection: true,
-        separatorColor: 'transparent',
         backgroundColor: bgcolor,
-        minRowHeight: 48
-    };
+        layout: 'vertical'
+    });
 
-    _tv_values = Ti.UI.createTableView (tvparams);
+    _rows = [];
+	for (var i = 0; i < _values.length; i++)
+	{
+        var row = build_row (i);
+        _rows.push (row);
 
-    _tv_rows = _tv_values.getData ()[0].rows;
+        _sv.add (row);
+	}
 
-    _tv_values.addEventListener ('click', function (e) {
-		_self.xsetValue (_values[e.index]);
-        setTimeout (function () {
-            _self.fireEvent ('done', { index: e.index, value: _value });
-        }, 250);
-	});
-
-    if (typeof selected_value !== 'undefined')
-    {
-        setValue (selected_value);
-    }
-
-    _content_view.add (_tv_values);
+    _content_view.add (_sv);
     _content_view.add (_btn_cancel);
 
     _self = TU.UI.createModalView ({
@@ -146,34 +126,35 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
 	{
         if (_selidx > -1)
         {
-            _tv_rows[_selidx].setBackgroundColor ('transparent');
-
-            if (_os === 'android')
-            {
-                _tv_rows[_selidx].label.setColor (color);
-            }
-            else
-            {
-                _tv_rows[_selidx].setColor (color);
-            }
+            _rows[_selidx].setBackgroundColor ('transparent');
+            _rows[_selidx].label.setColor (color);
         }
 
 	    for (var i = 0; i < _values.length; i++)
 	    {
-	        if (_values[i] == value)
+	        if (_values[i] === value)
 	        {
 	        	_selidx = i;
-                _tv_rows[i].setBackgroundColor (highlight_bgcolor);
+                _rows[i].setBackgroundColor (highlight_bgcolor);
+                _rows[i].label.setColor (highlight_color);
+
+                var scrollheight = _rowheight * (_selidx - 2);
+                if (scrollheight < 0)
+                {
+                    scrollheight = 0;
+                }
 
                 if (_os === 'android')
                 {
-                    _tv_rows[i].label.setColor (highlight_color);
+                    // https://jira.appcelerator.org/browse/TIMOB-17954
+                    // scrollTo needs units in px
+                    scrollheight = TU.UI.Sizer.dpToPx(scrollheight);
+                    _sv.scrollTo (0, scrollheight);
                 }
-                else
+                if (_os === 'ios')
                 {
-                    _tv_rows[i].setColor (highlight_color);
+                    _sv.setContentOffset ({ x: 0, y: scrollheight },  { animated:false } );
                 }
-	            _tv_values.scrollToIndex (_selidx, { animated: false });
                 break;
 	        }
 	    }
@@ -199,25 +180,25 @@ function SimplePicker (params)
 	
 	for (var k in params)
 	{
-		if (k == 'values')
+		if (k === 'values')
 		{
 			_values = params[k];
 			continue;
 		}
 
-        if (k == 'parent')
+        if (k === 'parent')
         {
             _parent = params[k];
             continue;
         }
 
-        if (k == 'highlight_color')
+        if (k === 'highlight_color')
         {
             _highlight_color = params[k];
             continue;
         }
 
-        if (k == 'highlight_bgcolor')
+        if (k === 'highlight_bgcolor')
         {
             _highlight_bgcolor = params[k];
             continue;
@@ -226,8 +207,8 @@ function SimplePicker (params)
 		newparams[k] = params[k];
 	}
 
-    if ((_parent == null)
-        || ((_parent.getLayout () != 'composite') && (typeof _parent.getLayout () !== 'undefined')))
+    if ((_parent === null)
+        || ((_parent.getLayout () !== 'composite') && (typeof _parent.getLayout () !== 'undefined')))
     {
         throw {
             message: 'Error: you must specify a parent view in params.parent, and the parent view must have a layout of "composite"'
@@ -284,16 +265,16 @@ function SimplePicker (params)
         text: "▼"
     };
 
-    btn = Ti.UI.createLabel (btnparams);
+    var btn = Ti.UI.createLabel (btnparams);
 
     _self.add (_label);
     _self.add (btn);
 
     _self.addEventListener ('click', function (e) {
-        if (_ppopup != null)
+        if (_ppopup !== null)
         {
-            _ppopup.xsetValue (_value);
             _parent.add (_ppopup);
+            _ppopup.xsetValue (_value);
             return;
         }
 
@@ -306,7 +287,7 @@ function SimplePicker (params)
         _ppopup.addEventListener ('done', function (e) {
             _parent.remove (_ppopup);
 
-            if (e.value == _value)
+            if (e.value === _value)
             {
                 return;
             }
@@ -318,6 +299,7 @@ function SimplePicker (params)
         });
 
         _parent.add (_ppopup);
+        _ppopup.xsetValue (_value);
     });
 
 	_self.xgetValue = function ()
@@ -329,7 +311,7 @@ function SimplePicker (params)
 	{
 		for (var i = 0; i < _values.length; i++)
 		{
-			if (_values[i] == value)
+			if (_values[i] === value)
 			{
 				_value = value;
     			_label.text = _value;

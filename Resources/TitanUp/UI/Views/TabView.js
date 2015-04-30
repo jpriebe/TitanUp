@@ -217,7 +217,7 @@ function TabView (params)
 
         _self.add (panel_view);
 
-        _self.onBeforeRemove = onBeforeRemove;
+        TU.UI.registerBeforeRemoveCallback(_self, onBeforeRemove);
 
         setTimeout (function () {
             // do this in a timeout so that the view can be created and an event listener added

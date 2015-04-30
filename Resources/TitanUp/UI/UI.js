@@ -175,14 +175,34 @@ UI.addView = function (child, parent)
 };
 
 /**
- * Removes a child view from a parent, firing beforeRemove and afterRemove events to the child,
- * so it can deregister itself and/or its children from data services, event listeners, etc.
+ * Registers a callback function to be called before a view is removed from its parent
+ * with TU.UI.removeView().
  *
- * If the child exposes a function called 'onBeforeRemove', that function will be called before
- * the event is fired.  This has the advantage of being an immediate call, versus the possible
- * delay before the event listener would be called.
+ * @param v
+ * @param f
+ */
+UI.registerBeforeRemoveCallback = function (v, f)
+{
+    if (typeof v.__beforeRemoveCallbacks === 'undefined')
+    {
+        v.__beforeRemoveCallbacks = [];
+    }
+
+	// have to do the push() call on a copy of the array, because of the way properties on proxy
+	// objects work: http://developer.appcelerator.com/question/139825/arraypush-not-working-on-tiuiview-custom-property
+    var tmp = v.__beforeRemoveCallbacks;
+    tmp.push (f);
+    v.__beforeRemoveCallbacks = tmp;
+};
+
+/**
+ * Removes a child view from a parent.
  *
- * If the parent is not specified, only the beforeRemove event will fire, and obviously, the
+ * If the child registers one or more BeforeRemoveCallbacks, those functions will be called before
+ * the view is removed.  This lets the child view cancel timeouts/intervals, remove event listeners,
+ * cancel network requests, etc.
+ *
+ * If the parent is not specified, the onBeforeRemove method will get called, but obviously, the
  * removal will not actually happen.
  *
  * @param {Ti.UI.View} child
@@ -190,17 +210,19 @@ UI.addView = function (child, parent)
  */
 UI.removeView = function (child, parent)
 {
-    var e = {
-        child: child,
-        parent: parent,
-        bubbles: false
-    };
-
-    if (typeof child.onBeforeRemove === 'function')
+    if (typeof child.__beforeRemoveCallbacks !== 'undefined')
     {
-        child.onBeforeRemove (e);
+        var e = {
+            child: child,
+            parent: parent
+        };
+
+        for (var i = 0; i < child.__beforeRemoveCallbacks.length; i++)
+        {
+            var f = child.__beforeRemoveCallbacks[i];
+            f(e);
+        }
     }
-    child.fireEvent ('beforeRemove', e);
 
     if (typeof parent === 'undefined')
     {
@@ -208,12 +230,6 @@ UI.removeView = function (child, parent)
     }
 
     parent.remove (child);
-
-    if (typeof child.onAfterRemove === 'function')
-    {
-        child.onAfterRemove (e);
-    }
-    child.fireEvent ('afterRemove', e);
 };
 
 /* Window management */

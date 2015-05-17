@@ -668,7 +668,6 @@ DrawerMenuWM.build_menu = function (menu_items, params)
 DrawerMenuWM.TUInit = function (tu)
 {
 	TU = tu;
-    TU.UI.DrawerMenuWM = DrawerMenuWM;
 };
 
 module.exports = DrawerMenuWM;

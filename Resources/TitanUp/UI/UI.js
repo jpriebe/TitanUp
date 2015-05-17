@@ -118,10 +118,10 @@ UI.createTGWM = function ()
     var TGWM = require ('/TitanUp/UI/TGWM');
     TGWM.TUInit (TU);
 
-    _curr_wm = TGWM;
+    _curr_wm = new TGWM ();
     TU.Context.track (_curr_wm);
 
-    return TGWM.createTabGroup ();
+    return _curr_wm;
 };
 
 UI.createDrawerMenuWM = function (params)

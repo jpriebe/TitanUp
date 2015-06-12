@@ -212,6 +212,14 @@ function GalleryViewImagePager (params) {
 
         TU.Logger.debug ('[GVIP] unloading image ' + _views[idx].image_index + ' (page ' + idx + ")");
 
+        TU.Logger.debug ("[GVIP] available memory: " + Ti.Platform.availableMemory);
+
+        if (typeof _views[idx].image_view !== 'undefined')
+        {
+            // this is a TiTouchImageView -- take special care to manage memory
+            _views[idx].image_view.recycleBitmap ();
+        }
+
         // I thought this might have something to do with it, but maybe not....
         //recursive_remove_children (_views[idx]);
         _views[idx].removeAllChildren ();
@@ -317,6 +325,8 @@ function GalleryViewImagePager (params) {
                 maxZoom: 3,
                 minZoom: 0.25
             });
+
+            v.image_view = iv;
 
             v.add (iv);
         };

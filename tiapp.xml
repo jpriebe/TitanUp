@@ -82,6 +82,7 @@
     <modules>
         <module platform="android">net.bajawa.pager</module>
         <module platform="android">com.tripvi.drawerlayout</module>
+        <module platform="android">org.iotashan.titouchimageview</module>
         <module platform="iphone">ti.map</module>
         <module platform="android">ti.map</module>
     </modules>

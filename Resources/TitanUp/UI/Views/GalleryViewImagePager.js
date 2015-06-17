@@ -212,14 +212,6 @@ function GalleryViewImagePager (params) {
 
         TU.Logger.debug ('[GVIP] unloading image ' + _views[idx].image_index + ' (page ' + idx + ")");
 
-        TU.Logger.debug ("[GVIP] available memory: " + Ti.Platform.availableMemory);
-
-        if (typeof _views[idx].image_view !== 'undefined')
-        {
-            // this is a TiTouchImageView -- take special care to manage memory
-            _views[idx].image_view.recycleBitmap ();
-        }
-
         // I thought this might have something to do with it, but maybe not....
         //recursive_remove_children (_views[idx]);
         _views[idx].removeAllChildren ();
@@ -308,6 +300,26 @@ function GalleryViewImagePager (params) {
 
     function load_image_via_xhr (v, url)
     {
+        url = '' + url;
+        if (url.match (/^\//))
+        {
+            var iv = TiTouchImageView.createView({
+                backgroundColor : '#000',
+                image: url,
+                defaultImage: '',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zoom: 1,
+                maxZoom: 3,
+                minZoom: 0.25
+            });
+
+            v.add (iv);
+            return;
+        }
+        
         var xhr = Ti.Network.createHTTPClient ();
 
         xhr.onload = function (e) {
@@ -325,8 +337,6 @@ function GalleryViewImagePager (params) {
                 maxZoom: 3,
                 minZoom: 0.25
             });
-
-            v.image_view = iv;
 
             v.add (iv);
         };
@@ -357,15 +367,31 @@ function GalleryViewImagePager (params) {
             return v;
         }
 
+        var view;
+        url = '' + url;
+        if (url.match (/^\//))
+        {
+            // local image
+            view = Ti.UI.createImageView({
+                backgroundColor : '#000',
+                width : w,
+                height : h,
+                image : url,
+                defaultImage: ''
+            });            
+        }
+        else
+        {
+            view = TU.UI.createRemoteImageView({
+                backgroundColor : '#000',
+                width : w,
+                height : h,
+                image : url,
+                defaultImage: ''
+            });
+        }
+        
 
-        //var view = Ti.UI.createImageView({
-        var view = TU.UI.createRemoteImageView({
-            backgroundColor : '#000',
-            width : w,
-            height : h,
-            image : url,
-            defaultImage: ''
-        });
 
         var sv = Ti.UI.createScrollView({
             top: 0,

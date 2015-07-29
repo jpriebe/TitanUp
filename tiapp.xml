@@ -8,14 +8,14 @@
         <target device="android">true</target>
         <target device="blackberry">false</target>
     </deployment-targets>
-    <sdk-version>3.4.1.GA</sdk-version>
+    <sdk-version>4.1.0.GA</sdk-version>
     <id>com.smorgasbork.TitanUpDemo</id>
     <name>TitanUpDemo</name>
     <version>1.0</version>
     <publisher>priebe</publisher>
     <url>http://www.smorgasbork.com/</url>
     <description>Demos the TitanUp library.</description>
-    <copyright>2014 by Jason Priebe</copyright>
+    <copyright>2015 by Jason Priebe</copyright>
     <icon>appicon.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
@@ -50,11 +50,13 @@
         </plist>
     </ios>
     <android xmlns:android="http://schemas.android.com/apk/res/android">
-        <manifest android:installLocation="auto" android:versionCode="100" android:versionName="2.0.0">
+        <manifest android:installLocation="auto"
+            android:versionCode="100" android:versionName="2.0.0">
             <application>
-                <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+                <meta-data
+                    android:name="com.google.android.maps.v2.API_KEY" android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
             </application>
-            <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19"/>
+            <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21"/>
             <!-- Allows the API to download data from Google Map servers -->
             <uses-permission android:name="android.permission.INTERNET"/>
             <!-- Allows the API to cache data -->
@@ -68,7 +70,8 @@
             <!-- Specify OpenGL ES 2.0 as a requirement -->
             <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
             <uses-permission android:name="com.smorgasbork.TitanUpDemo.permission.MAPS_RECEIVE"/>
-            <permission android:name="com.smorgasbork.TitanUpDemo.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
+            <permission
+                android:name="com.smorgasbork.TitanUpDemo.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
         </manifest>
     </android>
     <mobileweb>
@@ -80,7 +83,7 @@
         <theme>default</theme>
     </mobileweb>
     <modules>
-        <module platform="android">net.bajawa.pager</module>
+        <module platform="android">so.hau.tomas.pager</module>
         <module platform="android">com.tripvi.drawerlayout</module>
         <module platform="android">org.iotashan.titouchimageview</module>
         <module platform="iphone">ti.map</module>

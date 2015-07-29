@@ -57,9 +57,12 @@ function UIViewsSelectBarDemoWindow ()
 	_sb1 = TU.UI.createSelectBar ({
 		left: margin,
 		width: ctlwidth,
+        height: 44,
 		top: margin,
-		allow_deselect: false,
-		labels: ['foo', 'bar', 'baz']
+        config: {
+		    allow_deselect: false,
+		    labels: ['foo', 'bar', 'baz']
+        }
 	});
 	
 	contentview.add (_sb1);
@@ -77,8 +80,11 @@ function UIViewsSelectBarDemoWindow ()
 	_sb2 = TU.UI.createSelectBar ({
 		left: margin,
 		width: ctlwidth,
+        height: 44,
 		top: margin,
-		labels: ['foo', 'bar', 'baz']
+        config: {
+		    labels: ['foo', 'bar', 'baz']
+        }
 	});
 	
 	contentview.add (_sb2);
@@ -86,7 +92,7 @@ function UIViewsSelectBarDemoWindow ()
 	l = Ti.UI.createLabel ({
 		top: margin,
 		left: margin,
-		text: "TUchange event",
+		text: "change event",
         color: TU.UI.Theme.darkTextColor,
         font: TU.UI.Theme.fonts.mediumBold
 	});
@@ -96,12 +102,15 @@ function UIViewsSelectBarDemoWindow ()
 	_sb3 = TU.UI.createSelectBar ({
 		left: margin,
 		width: ctlwidth,
+        height: 44,
 		top: margin,
-		labels: ['foo', 'bar', 'baz']
+        config: {
+		    labels: ['foo', 'bar', 'baz']
+        }
 	});
 	
-	_sb3.addEventListener ('TUchange', function (e) {
-		_lEvent.text = "[TUchange] index: " + e.index;
+	_sb3.addEventListener ('change', function (e) {
+		_lEvent.text = "[change] index: " + e.index;
 	});
 	
 	contentview.add (_sb3);

@@ -147,6 +147,7 @@ function TabView (params)
     {
         if (typeof params.width === 'undefined')
         {
+            // fixme -- this assumes that the tab bar is being added to a full-width view
             _width = TU.Device.getDisplayWidth ();
             params.width = _width;
         }

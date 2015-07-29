@@ -1,206 +1,361 @@
 var TU = null;
 
 /**
- * Provides a cross-platform "tabbed bar" selection view; on iOS, uses the TabbedBar,
- * and on iOS, uses a series of Switch views.  Fires the "TUchange" event (note that this
- * is not the "change" event; see below)
- * 
- * var sb = TU.UI.createSelectBar ({
- * 		labels: ['foo', 'bar', 'baz']
- *      allow_deselect: true,
- * });
- * 
- * sb.addEventListener ('TUchange', function (e) {
- * 	   TU.Logger.debug ('new index: ' + e.index);
- * });
- *
- * sb.xsetSelectedIndex (1);
- * 
- * ...
- * 
- * var selection = sb.xgetSelectedIndex ();
- * 
- * NOTE:
- * We use "TUchange" as the event rather than "change" because on Android, "change" events from
- * the Switches themselves on Android would be sent to the eventListener for the SelectBar's
- * change event; not sure why that's happening.  You would have to filter those out in your event
- * listener if we used "change", so to keep it simpler, we use "TUchange".
- * 
- * NOTE:
- * The width of the control must be divisble evenly by the number of labels; otherwise, Titanium
- * will miscalculate the width of the switch views in android, and the switches will not fit
- * inside the parent view.  Code inside SelectBar will enforce this, but only if you specify an
- * explicit absolute width.  Don't try to just use left and right; instead, get the working area
- * of the parent view, and subtract the margins so you can pass an absolute width to the SelectBar.
- * 
- * @param {Object} params
+ * Provides a cross-platform "tabbed bar" selection view
  */
 function SelectBar (params)
 {
-	var _labels = [];
-	var _buttons = [];
-	var _self = null;
-	var _enabled = true;
-	
-	var _allow_deselect = true;
-	
-	var _current_idx = -1;
-	
-	var onswitchclick = function (e) 
-	{
-		// Ugh: getValue() doesn't work here -- just use the property directly...
-		var btn_val = e.source.value;
+    var _self = null;
+	var _button_bar = null;
+    var _buttons = [];
 
-		var btn_idx = -1;
-		for (var j = 0; j < _buttons.length; j++)
+    var _current_idx = -1;
+    var _selected_button = null;
+
+    var _allow_deselect = true;
+    var _enabled = true;
+
+	var _labels = [];
+    var _values = [];
+	
+	var _button_border_radius = 0;
+	var _button_spacing = -1;
+	var _horizontal_margin = 0;
+
+	var _font = TU.UI.Theme.fonts.medium;
+	var _color = TU.UI.Theme.darkTextColor;
+	var _color_active = TU.UI.Theme.lightTextColor;
+	var _color_selected = TU.UI.Theme.lightTextColor;
+	var _color_selected_active = TU.UI.Theme.lightTextColor;
+	var _background_color = TU.UI.Theme.lightBackgroundColor;
+	var _background_color_active = TU.UI.Theme.mediumBackgroundColor;
+	var _background_color_selected = TU.UI.Theme.darkBackgroundColor;
+	var _background_color_selected_active = TU.UI.Theme.mediumBackgroundColor;
+    var _border_color = TU.UI.Theme.darkBackgroundColor;
+    var _border_color_active = TU.UI.Theme.mediumBackgroundColor;
+    var _border_color_selected = TU.UI.Theme.darkBackgroundColor;
+    var _border_color_selected_active = TU.UI.Theme.mediumBackgroundColor;
+
+	var _width = 0;
+	var _button_width = 0;
+
+	_process_params ();
+    _init ();
+
+    return _self;
+
+	function _process_params ()
+	{
+		if (typeof params === 'undefined')
 		{
-			if (_buttons[j] == e.source)
-			{
-				btn_idx = j;
-				break;
-			}
-		}
-		
-		if (btn_idx == -1)
-		{
-			// this should never happen - punt
-			return;
-		}
-		
-		var new_idx = btn_idx;
-		if (btn_val)
-		{
-			if (btn_idx != _current_idx)
-			{
-				// if we've got a new index, turn off the last button
-				if (_current_idx != -1)
-				{
-					_buttons[_current_idx].setValue (false);
-				}
-			}
+			params = {};
 		}
 		else
 		{
-			if (_allow_deselect)
-			{
-				new_idx = -1;
-			}
-			else
-			{
-				e.source.setValue (true);
-			}
+			params = JSON.parse (JSON.stringify (params));
 		}
-		
-		if (new_idx != _current_idx)
-		{
-			_current_idx = new_idx;
-			_self.fireEvent ('TUchange', { index: _current_idx });
-		}
-	};
 
-	var _init = function (params)
-	{
-		if (typeof params.labels == 'undefined')
+		var config;
+
+		if (typeof params.config !== 'undefined')
 		{
-			return null;	
+			config = params.config;
+			delete params.config;
 		}
-		_labels = params.labels;
-		
-		if (typeof params.allow_deselect != 'undefined')
+		else
 		{
-			_allow_deselect = params.allow_deselect;
-			delete params.allow_deselect;
+			throw ({ message: 'Must specify config property in initialization parameters.'});
 		}
-	
-		if (typeof params.height == 'undefined')
+
+		if (typeof config.labels === 'undefined')
 		{
-			params.height = Ti.UI.SIZE;
+			throw ({ message: 'Must specify labels in config.'});
 		}
-		
-        if (typeof params.backgroundColor == 'undefined')
+		_labels = config.labels;
+
+		if (typeof config.values === 'undefined')
+		{
+            _values = JSON.parse (JSON.stringify (_labels));
+		}
+        else
         {
-            params.backgroundColor = TU.UI.Theme.darkBackgroundColor;
+            _values = config.values;
         }
 
-		if (TU.Device.getOS () == 'ios')
+		if (_values.length !== _labels.length)
 		{
-			if (typeof params.style == 'undefined')
-			{
-				 params.style = Titanium.UI.iPhone.SystemButtonStyle.BAR;
-			}
-			
-			_self = Ti.UI.iOS.createTabbedBar(params);
-
-			_self.addEventListener ('click', function (e) {
-			    //TU.Logger.debug ('[SelectBar] click; e.index=' + e.index);
-			    if (_current_idx == e.index)
-			    {
-			        return;
-			    }
-				_current_idx = e.index;
-				_self.fireEvent ('TUchange', { index: _self.xgetSelectedIndex () });
-			});
-
-			if (_allow_deselect)
-			{
-				// @HACK: on iOS, you get a singletap followed by a click event whenever
-				// the user changes a value of the TabbedBar.  But if you tap an already-
-				// selected button on the bar, you only get the singletap
-				_self.addEventListener ('singletap', function (e) {
-				    var idx = parseInt (e.x / Math.round (_self.size.width / _labels.length));
-                    //TU.Logger.debug ('[SelectBar] singletap; idx=' + idx);
-				    if (idx == _current_idx)
-				    {
-				        _current_idx = -1;
-                        _self.setIndex (null);
-                        _self.fireEvent ('TUchange', { index: -1 });
-				    }
-				});
-			}
+			throw ({ message: 'Labels array and values array must have the same length.'});
 		}
-	
+
+        if (typeof config.allow_deselect !== 'undefined')
+        {
+            _allow_deselect = config.allow_deselect;
+        }
+
+        if (typeof config.button_border_radius !== 'undefined')
+		{
+			_button_border_radius = config.button_border_radius;
+		}
+
+		if (typeof config.button_spacing !== 'undefined')
+		{
+			_button_spacing = config.button_spacing;
+		}
+
+		if (typeof config.horizontal_margin !== 'undefined')
+		{
+			_horizontal_margin = config.horizontal_margin;
+		}
+
+		if (typeof config.font !== 'undefined')
+		{
+			_font = config.font;
+		}
+
+		if (typeof config.color !== 'undefined')
+		{
+			_color = config.color;
+		}
+
+		if (typeof config.color_active !== 'undefined')
+		{
+			_color_active = config.color_active;
+		}
+
+		if (typeof config.color_selected !== 'undefined')
+		{
+			_color_selected = config.color_selected;
+		}
+
+		if (typeof config.color_selected_active !== 'undefined')
+		{
+			_color_selected_active = config.color_selected_active;
+		}
 		else
 		{
-			params.layout = 'horizontal';
-			var btnw = parseInt (100 / _labels.length); 
-			btnw = '' + btnw + '%';
-
-            // make sure width is divisible by the number of themes; this has to do with buggy rounding in
-            // percentage-based widths; if the rounding doesn't add up to < 100%, you'll drop the last button
-            if (typeof params.width !== 'undefined')
-            {
-                params.width = params.width - (params.width % _labels.length);
-            }
-
-			_self = Ti.UI.createView(params);
-			for (var i = 0; i < _labels.length; i++)
-			{
-				var label = params.labels[i];
-				var button = Ti.UI.createSwitch ({
-					titleOn: label,
-					titleOff: label,
-					font: TU.UI.Theme.fonts.small,
-					width: btnw
-				});
-				_buttons.push (button);
-				button.addEventListener ('click', onswitchclick);
-				_self.add (button);
-			}
+			_color_selected_active = _color_active;
 		}
-	};
-	
-	_init (params);
-	if (_self == null)
-	{
-		return null;
+
+		if (typeof config.background_color !== 'undefined')
+		{
+			_background_color = config.background_color;
+		}
+
+		if (typeof config.background_color_active !== 'undefined')
+		{
+			_background_color_active = config.background_color_active;
+		}
+
+		if (typeof config.background_color_selected !== 'undefined')
+		{
+			_background_color_selected = config.background_color_selected;
+		}
+
+		if (typeof config.background_color_selected_active !== 'undefined')
+		{
+			_background_color_selected_active = config.background_color_selected_active;
+		}
+		else
+		{
+			_background_color_selected_active = _background_color_active;
+		}
+
+        if (typeof config.border_color !== 'undefined')
+        {
+            _border_color = config.border_color;
+        }
+
+        if (typeof config.border_color_active !== 'undefined')
+        {
+            _border_color_active = config.border_color_active;
+        }
+
+        if (typeof config.border_color_selected !== 'undefined')
+        {
+            _border_color_selected = config.border_color_selected;
+        }
+
+        if (typeof config.border_color_selected_active !== 'undefined')
+        {
+            _border_color_selected_active = config.border_color_selected_active;
+        }
+        else
+        {
+            _border_color_selected_active = _border_color_active;
+        }
 	}
-	
-	_self.xgetSelectedIndex = function ()
+
+
+    function _init ()
+    {
+		if (typeof params.width === 'undefined')
+		{
+			// fixme -- this assumes that the tab bar is being added to a full-width view
+			_width = TU.Device.getDisplayWidth ();
+			params.width = _width;
+		}
+        else
+        {
+            _width = params.width;
+        }
+
+		_self = Ti.UI.createView (params);
+
+		_button_width = parseInt ((_width - (_labels.length - 1) * _button_spacing - 2 * _horizontal_margin) / _labels.length);
+
+		_button_bar = Ti.UI.createView ({
+			left: _horizontal_margin,
+			right: _horizontal_margin,
+			top: 0,
+            bottom: 0,
+			layout: 'horizontal'
+		});
+
+		_buttons = [];
+
+		for (var i = 0; i < _labels.length; i++)
+		{
+			var button = Ti.UI.createView ({
+                top: 0,
+                bottom: 0,
+				width: _button_width,
+				left: (i == 0) ? 0 : _button_spacing,
+				backgroundColor: _background_color,
+                borderColor: _border_color,
+                borderWidth: 1,
+				borderRadius: _button_border_radius
+			});
+
+			var l = Ti.UI.createLabel ({
+				font: _font,
+				color: _color,
+				text: _labels[i]
+			});
+
+			button.label = l;
+			button.add (l);
+
+			button.idx = i;
+
+			function addEventListeners (b)
+			{
+				button.addEventListener('touchstart', function (e) {
+					b.inactive_color = b.label.getColor ();
+					b.inactive_background_color = b.getBackgroundColor ();
+					b.inactive_border_color = b.getBorderColor ();
+
+					if (b === _selected_button)
+					{
+						b.label.setColor (_color_selected_active);
+						b.setBackgroundColor (_background_color_selected_active);
+						b.setBorderColor (_border_color_selected_active);
+					}
+					else
+					{
+						b.label.setColor (_color_active);
+						b.setBackgroundColor (_background_color_active);
+						b.setBorderColor (_border_color_active);
+					}
+				});
+
+				button.addEventListener('touchend', function (e) {
+                    if (b.idx === _current_idx)
+                    {
+                        if (_allow_deselect)
+                        {
+                            deselect_button ();
+                        }
+                        else
+                        {
+                            b.label.setColor (b.inactive_color);
+                            b.setBackgroundColor (b.inactive_background_color);
+                            b.setBorderColor (b.inactive_border_color);
+                        }
+                    }
+                    else
+                    {
+                        select_button (b.idx);
+                    }
+				});
+
+				button.addEventListener('touchcancel', function (e) {
+					b.label.setColor (b.inactive_color);
+					b.setBackgroundColor (b.inactive_background_color);
+					b.setBorderColor (b.inactive_border_color);
+				});
+			}
+
+			addEventListeners (button);
+
+			_buttons.push (button);
+			_button_bar.add (button);
+		}
+
+		_self.add (_button_bar);
+
+        _self.xgetSelectedIndex = xgetSelectedIndex;
+        _self.xsetSelectedIndex = xsetSelectedIndex;
+        _self.xsetEnabled = xsetEnabled;
+    }
+
+    function deselect_button ()
+    {
+        if (_current_idx === -1)
+        {
+            // nothing to do if we don't already have a selected button...
+            return;
+        }
+
+        _buttons[_current_idx].label.setColor (_color);
+        _buttons[_current_idx].setBackgroundColor (_background_color);
+        _buttons[_current_idx].setBorderColor (_border_color);
+
+        _current_idx = -1;
+        _selected_button = null;
+
+        _self.fireEvent ('change', {
+            index: -1,
+            value: null,
+            label: null
+        });
+    }
+
+
+    function select_button(idx)
+    {
+        _buttons[idx].label.setColor (_color_selected);
+        _buttons[idx].setBackgroundColor (_background_color_selected);
+        _buttons[idx].setBorderColor (_border_color_selected);
+
+        if (idx === _current_idx)
+        {
+            return;
+        }
+
+        if (_current_idx >= 0)
+        {
+            _buttons[_current_idx].label.setColor (_color);
+            _buttons[_current_idx].setBackgroundColor (_background_color);
+            _buttons[_current_idx].setBorderColor (_border_color);
+        }
+
+        _current_idx = idx;
+        _selected_button = _buttons[idx];
+
+        _self.fireEvent ('change', {
+            index: idx,
+            value: _values[idx],
+            label: _labels[idx]
+        });
+    }
+    
+
+    function xgetSelectedIndex ()
 	{
 		return _current_idx;
-	};
+	}
 		
-	_self.xsetSelectedIndex = function (idx)
+	function xsetSelectedIndex (idx)
 	{
 		if (idx < -1)
 		{
@@ -210,41 +365,14 @@ function SelectBar (params)
 		{
 			return;
 		}
-		
-		_current_idx = idx;
-		
-		if (TU.Device.getOS () == 'ios')
-		{
-			if (idx == -1)
-			{
-				idx = null;
-			}
-			
-			_self.setIndex (idx);
-			return;
-		}
-		
-		for (var i = 0; i < _buttons.length; i++)
-		{
-			_buttons[i].setValue (false);			
-		}
-		_buttons[idx].setValue (true);
-	};
+
+        select_button (idx);
+	}
 	
-	_self.xsetEnabled = function (enabled)
+	function xsetEnabled (enabled)
 	{
-		_enabled = enabled;
-		if (TU.Device.getOS () == 'ios')
-		{
-			_self.setTouchEnabled (enabled);
-			return;
-		}
-		
-		for (var j = 0; j < _buttons.length; j++)
-		{
-			_buttons[j].enabled = enabled;
-		}
-	};
+        _self.setTouchEnabled (enabled);
+	}
 	
 	return _self;
 }

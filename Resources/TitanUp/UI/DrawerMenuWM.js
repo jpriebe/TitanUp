@@ -415,10 +415,16 @@ function DrawerMenuWM (params)
             centerView: _main_view,
             leftDrawerWidth: _left_menu_view.width,
             width: Ti.UI.FILL,
-            height: Ti.UI.FILL
+            height: Ti.UI.FILL,
+            drawerArrowIcon : true
         });
     
         _self.addEventListener('open', function(e) {
+            _self.activity.actionBar.displayHomeAsUp = true;
+
+            _self.activity.actionBar.onHomeIconItemSelected = function() {
+                d.toggleLeftWindow();
+            };
 
             // android best practices suggest opening the app with the drawer open until the
             // user learns to operate it himself
@@ -446,15 +452,7 @@ function DrawerMenuWM (params)
                 }, 1000);
             }
 
-            if (typeof params.title_image !== 'undefined')
-            {
-                _self.activity.actionBar.setLogo (params.title_image);
-                _self.activity.actionBar.setTitle ('');
-            }
-
-            _self.activity.actionBar.onHomeIconItemSelected = function() {
-                d.toggleLeftWindow();
-            };
+            _self.activity.actionBar.setTitle (params.title);
         });
     
         _self.add (d);
@@ -493,7 +491,7 @@ function DrawerMenuWM (params)
                 w.activity.actionBar.displayHomeAsUp = true;
 
                 w.activity.actionBar.onHomeIconItemSelected = function() {
-                    w.close ();
+                    TU.UI.closeWindow (w);
                 };
             });
             w.open();
@@ -668,6 +666,7 @@ DrawerMenuWM.build_menu = function (menu_items, params)
 DrawerMenuWM.TUInit = function (tu)
 {
 	TU = tu;
+    TU.UI.DrawerMenuWM = DrawerMenuWM;
 };
 
 module.exports = DrawerMenuWM;

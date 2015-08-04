@@ -37,6 +37,7 @@ function TextField (params)
     params.right = _pright;
     params.top = 0;
     params.bottom = 0;
+    params.backgroundColor = 'transparent';
 
     _self = Ti.UI.createTextField(params);
 

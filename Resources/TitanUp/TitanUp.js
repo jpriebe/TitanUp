@@ -34,6 +34,17 @@ TitanUp.Context.TUInit (TitanUp);
 TitanUp.UI = require ('/TitanUp/UI/UI');
 TitanUp.UI.TUInit (TitanUp);
 
+// Ti.App.getName() doesn't honor the application name in the i18n/en/app.xml
+var _i18n_appname = L('app_name', '*');
+var _ti_appname = Ti.App.getName ();
+
+var _appname = (_i18n_appname === '*') ? _ti_appname : _i18n_appname;
+
+TitanUp.getAppName = function ()
+{
+    return _appname;
+};
+
 
 TitanUp.getLocationManager = function ()
 {

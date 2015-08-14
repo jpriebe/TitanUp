@@ -21,10 +21,11 @@ var _ipad_level = -1;
 
 var _ios7plus = false;
 var _android4plus = false;
+var _android5plus = false;
 
 var _has_google_play_services = false;
 
-function Device () 
+function Device ()
 {
 }
 
@@ -68,10 +69,13 @@ function initialize ()
         var version = Titanium.Platform.version.split(".");
         var major = parseInt(version[0],10);
 
-        // Can only test this support on a 3.2+ device
         if (major >= 4)
         {
             _android4plus = true;
+            if (major >= 5)
+            {
+                _android5plus = true;
+            }
         }
     }
 
@@ -92,15 +96,15 @@ function initialize ()
     }
 
     _dc = Ti.Platform.displayCaps;
-	_density = _dc.density;
-	_dpi = _dc.dpi;
+    _density = _dc.density;
+    _dpi = _dc.dpi;
 
     var pw = Device.getPhysicalWidth();
     var ph = Device.getPhysicalHeight();
     _screensize = Math.sqrt (pw * pw + ph * ph);
 
-	_isTablet = (_osname === 'ipad') 
-		|| ((_os === 'android') && (_screensize >= 6.25));
+    _isTablet = (_osname === 'ipad')
+        || ((_os === 'android') && (_screensize >= 6.25));
 
     TU.Logger.debug ("[TitanUp.Device] os: " + _os);
     TU.Logger.debug ("[TitanUp.Device] density: " + _density);
@@ -121,8 +125,8 @@ function initialize ()
         }
     }
 
-	_workingWidth = Device.getDisplayWidth();
-	_workingHeight = Device.getDisplayHeight();
+    _workingWidth = Device.getDisplayWidth();
+    _workingHeight = Device.getDisplayHeight();
 }
 
 
@@ -134,7 +138,7 @@ function initialize ()
  */
 Device.getOS = function ()
 {
-	return _os;
+    return _os;
 };
 
 /**
@@ -183,6 +187,16 @@ Device.getAndroid4Plus = function ()
 {
     return _android4plus;
 };
+
+/**
+ * Gets a boolean indicating whether this is android 5 or up
+ * @returns {boolean}
+ */
+Device.getAndroid5Plus = function ()
+{
+    return _android5plus;
+};
+
 
 /**
  * Gets a boolean indicating whether this device is known to have google play services; errs
@@ -275,7 +289,7 @@ Device.getDisplayHeight = function ()
  */
 Device.getDensity = function ()
 {
-	return _density;
+    return _density;
 };
 
 /**
@@ -284,7 +298,7 @@ Device.getDensity = function ()
  */
 Device.getDpi = function ()
 {
-	return _dpi;
+    return _dpi;
 };
 
 /**
@@ -297,7 +311,7 @@ Device.getNativeUnit = function ()
     {
         return 'dp';
     }
-    
+
     return 'px';
 };
 
@@ -330,7 +344,7 @@ Device.getLogicalDensityFactor = function ()
                 break;
         }
     }
-    
+
     return 1;
 };
 
@@ -341,7 +355,7 @@ Device.getLogicalDensityFactor = function ()
  */
 Device.getIsTablet = function ()
 {
-	return _isTablet;
+    return _isTablet;
 };
 
 /**
@@ -370,7 +384,7 @@ Device.getPhysicalHeight = function ()
  */
 Device.getScreensize = function ()
 {
-	return _screensize;
+    return _screensize;
 };
 
 /**
@@ -382,7 +396,7 @@ Device.getScreensize = function ()
  */
 Device.getWorkingWidth = function ()
 {
-	return _workingWidth;
+    return _workingWidth;
 };
 
 /**
@@ -394,7 +408,7 @@ Device.getWorkingWidth = function ()
  */
 Device.getWorkingHeight = function ()
 {
-	return _workingHeight;
+    return _workingHeight;
 };
 
 /**
@@ -405,8 +419,8 @@ Device.getWorkingHeight = function ()
  */
 Device.setWorkingDimensions = function (workingWidth, workingHeight)
 {
-	_workingWidth = workingWidth;
-	_workingHeight = workingHeight;
+    _workingWidth = workingWidth;
+    _workingHeight = workingHeight;
 };
 
 Device.TUInit = function (tu)

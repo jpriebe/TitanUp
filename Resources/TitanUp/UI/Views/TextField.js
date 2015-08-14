@@ -30,14 +30,22 @@ function TextField (params)
 
     _wrapper = Ti.UI.createView (params);
 
-    delete params.width;
-    delete params.height;
+    if (typeof params.width !== 'undefined')
+    {
+        params.width -= (_pleft + _pright);
+    }
 
     params.left = _pleft;
     params.right = _pright;
     params.top = 0;
     params.bottom = 0;
     params.backgroundColor = 'transparent';
+
+    if (TU.Device.getAndroid5Plus())
+    {
+        params.top = 4;
+        delete params.bottom;
+    }
 
     _self = Ti.UI.createTextField(params);
 

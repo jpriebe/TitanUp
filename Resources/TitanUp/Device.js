@@ -37,7 +37,7 @@ function initialize ()
     _platformName = Ti.Platform.name;
     _model = Ti.Platform.model;
 
-    if (_platformName === 'iPhone OS')
+    if ((_platformName === 'iPhone OS') || (_platformName === 'iOS'))
     {
         _os = 'ios';
 

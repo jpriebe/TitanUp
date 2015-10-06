@@ -43,6 +43,10 @@ Sizer.pxToDp = function  (px)
         case 'xxhigh':
             dp = parseInt (px / 3);
             break;
+
+        case 'xxxhigh':
+            dp = parseInt (px / 4);
+            break;
     }
 
     return dp;
@@ -76,6 +80,10 @@ Sizer.dpToPx = function  (dp)
 
         case 'xxhigh':
             px = parseInt (dp * 3);
+            break;
+
+        case 'xxxhigh':
+            px = parseInt (dp * 4);
             break;
     }
 
@@ -125,9 +133,10 @@ Sizer.getDimension = function (m)
  * @param int h
  * @param int xh
  * @param int xxh
+ * @param int xxxh
  * @return int
  */
-Sizer.getDimensionExact = function (l, m, h, xh, xxh)
+Sizer.getDimensionExact = function (l, m, h, xh, xxh, xxxh)
 {
     if (_defaultunit == 'dp')
     {
@@ -160,6 +169,10 @@ Sizer.getDimensionExact = function (l, m, h, xh, xxh)
 
         case 'xxhigh':
             dimension = xxh;     
+            break;
+
+        case 'xxxhigh':
+            dimension = xxxh;
             break;
     }
     

@@ -87,10 +87,13 @@ function check_update_callbacks ()
         var dist = LocationManager.compute_distance (o.last_loc.latitude, o.last_loc.longitude, _coords.latitude, _coords.longitude);
         if (dist >= o.distance)
         {
-            TU.Logger.debug ('[LocationManager] moved ' + dist + ' km since last update; calling callback');
+            TU.Logger.debug ('[LocationManager] (callback ' + i + ', ' + o.distance + ') moved ' + dist + ' km since last update; calling callback');
             o.last_loc = JSON.parse (JSON.stringify (_coords));
             o.function ();
-            continue;
+        }
+        else
+        {
+            TU.Logger.debug ('[LocationManager] (callback ' + i + ', ' + o.distance + ') moved ' + dist + ' km since last update; not calling callback');
         }
     }
 }

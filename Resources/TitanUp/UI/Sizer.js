@@ -1,7 +1,8 @@
 var TU = null;
 
-var _defaultunit = '';
-var _density = 'medium';
+var _defaultunit = 'dp';     // we will check this from Ti SDK, but you *are* using dp, right???  :-P
+var _density = 'medium';     // density string, adjusted to make ios and android densities equivalent
+var _ldf = 1;                // logical density factor (relative to 160 dpi); calculated based on density string, not physical screen resolution
 var _isTablet = false;
 
 /**
@@ -13,7 +14,6 @@ function Sizer ()
 {
 }
 
-
 /**
  * Given a value in pixels, converts it to dp
  * @param px
@@ -21,35 +21,7 @@ function Sizer ()
  */
 Sizer.pxToDp = function  (px)
 {
-    var dp = px;
-    switch (_density)
-    {
-        case 'low':
-            dp = parseInt (px / 0.75);
-            break;
-
-        case 'medium':
-            dp = px;
-            break;
-
-        case 'high':
-            dp = parseInt (px / 1.5);
-            break;
-
-        case 'xhigh':
-            dp = parseInt (px / 2);
-            break;
-
-        case 'xxhigh':
-            dp = parseInt (px / 3);
-            break;
-
-        case 'xxxhigh':
-            dp = parseInt (px / 4);
-            break;
-    }
-
-    return dp;
+    return parseInt (px / _ldf);
 };
 
 /**
@@ -59,35 +31,7 @@ Sizer.pxToDp = function  (px)
  */
 Sizer.dpToPx = function  (dp)
 {
-    var px = dp;
-    switch (_density)
-    {
-        case 'low':
-            px = parseInt (dp * 0.75);
-            break;
-
-        case 'medium':
-            px = dp;
-            break;
-
-        case 'high':
-            px = parseInt (dp * 1.5);
-            break;
-
-        case 'xhigh':
-            px = parseInt (dp * 2);
-            break;
-
-        case 'xxhigh':
-            px = parseInt (dp * 3);
-            break;
-
-        case 'xxxhigh':
-            px = parseInt (dp * 4);
-            break;
-    }
-
-    return px;
+    return parseInt (dp * _ldf);
 };
 
 /**
@@ -100,19 +44,14 @@ Sizer.dpToPx = function  (dp)
  * @param int m
  * @return int
  */
-Sizer.getDimension = function (m) 
+Sizer.getDimension = function (dp)
 {
-    if (_defaultunit == 'dp')
+    if (_defaultunit === 'dp')
     {
-        return m;
+        return dp;
     }
 
-    var l = parseInt (m * 0.75);
-    var h = parseInt (m * 1.5);
-    var xh = m * 2;
-    var xxh = m * 3;
-
-    return Sizer.getDimensionExact (l, m, h, xh, xxh);
+    return Sizer.dpToPx (dp);
 };
 
 
@@ -138,7 +77,7 @@ Sizer.getDimension = function (m)
  */
 Sizer.getDimensionExact = function (l, m, h, xh, xxh, xxxh)
 {
-    if (_defaultunit == 'dp')
+    if (_defaultunit === 'dp')
     {
         //TU.Logger.debug ("[TU.UI.Sizer] getDimensionExact (" + l + ", " + m + ", " + h + ", " + xh + "); defaultunit == dp: return " + m + "dp");
         return m;
@@ -182,6 +121,52 @@ Sizer.getDimensionExact = function (l, m, h, xh, xxh, xxxh)
 function initialize ()
 {
     _density = TU.Device.getDensity ();
+
+    if (TU.Device.getOS() === 'ios')
+    {
+        // for ios, titanium reports some weird density values; medium ios = medium android,
+        // but for higher resolutions, they don't match.
+        switch (_density)
+        {
+            case 'medium':
+                break;
+            case 'high':
+                // iphone 6
+                _density = 'xhigh';
+                break;
+            case 'xhigh':
+                // @2x devices, like iphone 6
+                _density = 'xxhigh';
+                break;
+            case 'xxhigh':
+                // @3x devices, like iphone 6+
+                _density = 'xxxhigh';
+                break;
+        }
+    }
+
+    switch (_density)
+    {
+        case 'low':
+            _ldf = 0.75;
+            break;
+        case 'medium':
+            _ldf = 1;
+            break;
+        case 'high':
+            _ldf = 1.5;
+            break;
+        case 'xhigh':
+            _ldf = 2;
+            break;
+        case 'xxhigh':
+            _ldf = 3;
+            break;
+        case 'xxxhigh':
+            _ldf = 4;
+            break;
+    }
+
 
     _defaultunit = TU.Device.getDefaultUnit ();
 

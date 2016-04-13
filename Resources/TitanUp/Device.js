@@ -100,6 +100,7 @@ function initialize ()
 
     if (_os === 'ios')
     {
+        var msg = "[TitanUp.Device] ios density conversion: " + _density + " -> ";
         // for ios, titanium reports some weird density values; medium ios = medium android,
         // but for higher resolutions, they don't match.
         switch (_density)
@@ -107,18 +108,17 @@ function initialize ()
             case 'medium':
                 break;
             case 'high':
-                // iphone 6
+                // iphone 4
                 _density = 'xhigh';
                 break;
             case 'xhigh':
-                // @2x devices, like iphone 6
+                // @3x devices, like iphone 6+
                 _density = 'xxhigh';
                 break;
-            case 'xxhigh':
-                // @3x devices, like iphone 6+
-                _density = 'xxxhigh';
-                break;
         }
+
+        msg += _density;
+        TU.Logger.debug (msg);
     }
 
     _dpi = _dc.dpi;
@@ -359,11 +359,11 @@ Device.getLogicalDensityFactor = function ()
                 return 1;
                 break;
 
-            case 'high':
+            case 'xhigh':
                 return 2;
                 break;
 
-            case 'xhigh':
+            case 'xxhigh':
                 return 3;
                 break;
         }

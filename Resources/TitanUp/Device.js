@@ -97,6 +97,30 @@ function initialize ()
 
     _dc = Ti.Platform.displayCaps;
     _density = _dc.density;
+
+    if (_os === 'ios')
+    {
+        // for ios, titanium reports some weird density values; medium ios = medium android,
+        // but for higher resolutions, they don't match.
+        switch (_density)
+        {
+            case 'medium':
+                break;
+            case 'high':
+                // iphone 6
+                _density = 'xhigh';
+                break;
+            case 'xhigh':
+                // @2x devices, like iphone 6
+                _density = 'xxhigh';
+                break;
+            case 'xxhigh':
+                // @3x devices, like iphone 6+
+                _density = 'xxxhigh';
+                break;
+        }
+    }
+
     _dpi = _dc.dpi;
 
     var pw = Device.getPhysicalWidth();

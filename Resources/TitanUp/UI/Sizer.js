@@ -122,29 +122,6 @@ function initialize ()
 {
     _density = TU.Device.getDensity ();
 
-    if (TU.Device.getOS() === 'ios')
-    {
-        // for ios, titanium reports some weird density values; medium ios = medium android,
-        // but for higher resolutions, they don't match.
-        switch (_density)
-        {
-            case 'medium':
-                break;
-            case 'high':
-                // iphone 6
-                _density = 'xhigh';
-                break;
-            case 'xhigh':
-                // @2x devices, like iphone 6
-                _density = 'xxhigh';
-                break;
-            case 'xxhigh':
-                // @3x devices, like iphone 6+
-                _density = 'xxxhigh';
-                break;
-        }
-    }
-
     switch (_density)
     {
         case 'low':

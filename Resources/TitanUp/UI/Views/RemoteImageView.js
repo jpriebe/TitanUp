@@ -1,5 +1,3 @@
-var TU = null;
-
 /**
  * This ImageView is a little different from the stock ImageView in that it uses HTTPClient to
  * retrieve remote images so that it can trigger events properly
@@ -11,7 +9,9 @@ function RemoteImageView (params)
 {
     var _self;
     var _url;
+    var _timeout = 30000;
     var _onload = null;
+    var _onerror = null;
 
     _process_params ();
     _init ();
@@ -20,13 +20,6 @@ function RemoteImageView (params)
 
     function _process_params ()
     {
-    	var newparams = JSON.parse (JSON.stringify (params));
-    	
-    	if (typeof params.onload !== 'undefined')
-    	{
-    		newparams.onload = params.onload;
-    	}
-
         if (typeof params.image === 'undefined')
         {
             throw {
@@ -34,12 +27,36 @@ function RemoteImageView (params)
             };
         }
 
+    	var newparams = JSON.parse (JSON.stringify (params));
+    	
+    	if (typeof params.onload !== 'undefined')
+    	{
+            newparams.onload = params.onload;
+    	}
+
+        if (typeof params.onerror !== 'undefined')
+        {
+            newparams.onerror = params.onerror;
+        }
+
+        params = newparams;
+
         _url = params.image;
         delete params.image;
+
+        if (typeof params.timeout !== 'undefined')
+        {
+            _timeout = params.timeout;
+        }
 
         if (typeof params.onload !== 'undefined')
         {
             _onload = params.onload;
+        }
+
+        if (typeof params.onerror !== 'undefined')
+        {
+            _onerror = params.onerror;
         }
     }
 
@@ -74,13 +91,11 @@ function RemoteImageView (params)
 
     function onerror (e)
     {
-        TU.Logger.warn ("Could not load image from: " + _url);
+        if (_onerror != null)
+        {
+            _onerror (e);
+        }
     }
 }
-
-RemoteImageView.TUInit = function (tu)
-{
-    TU = tu;
-};
 
 module.exports = RemoteImageView;

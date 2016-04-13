@@ -118,10 +118,10 @@ UI.createTGWM = function ()
     var TGWM = require ('/TitanUp/UI/TGWM');
     TGWM.TUInit (TU);
 
-    _curr_wm = new TGWM ();
+    _curr_wm = TGWM;
     TU.Context.track (_curr_wm);
 
-    return _curr_wm;
+    return TGWM.createTabGroup ();
 };
 
 UI.createDrawerMenuWM = function (params)
@@ -154,8 +154,6 @@ UI.createTextField = function (params)
 UI.createRemoteImageView = function (params)
 {
     var RemoteImageView = require ('/TitanUp/UI/Views/RemoteImageView');
-    RemoteImageView.TUInit (TU);
-
     return new RemoteImageView (params);
 };
 
@@ -173,6 +171,27 @@ UI.addView = function (child, parent)
         parent: parent
     });
 };
+
+/**
+ * Registers a callback function to be called before a window is closed.
+ *
+ * @param w
+ * @param f
+ */
+UI.registerBeforeCloseCallback = function (w, f)
+{
+    if (typeof w.__beforeCloseCallbacks === 'undefined')
+    {
+        w.__beforeCloseCallbacks = [];
+    }
+
+    // have to do the push() call on a copy of the array, because of the way properties on proxy
+    // objects work: http://developer.appcelerator.com/question/139825/arraypush-not-working-on-tiuiview-custom-property
+    var tmp = w.__beforeCloseCallbacks;
+    tmp.push (f);
+    w.__beforeCloseCallbacks = tmp;
+};
+
 
 /**
  * Registers a callback function to be called before a view is removed from its parent
@@ -254,10 +273,10 @@ UI.openWindow = function (w)
     TU.Context.track (w);
 
     w.addEventListener ('close', function (e) {
-        if (w == _window_stack[_window_stack.length - 1])
+        if (w === _window_stack[_window_stack.length - 1])
         {
             _window_stack.pop ();
-            TU.Logger.warn ('[TitanUp.UI] window closed; window.stack.length: ' + _window_stack.length);
+            TU.Logger.info ('[TitanUp.UI] window closed; window.stack.length: ' + _window_stack.length);
         }
         else
         {
@@ -269,6 +288,15 @@ UI.openWindow = function (w)
     {
         w.open ();
         return;
+    }
+
+    if (TU.Device.getOS () === 'android')
+    {
+        w.addEventListener ('androidback', function (e) {
+            // catch the back button to close the window; without this event listener,
+            // we don't have as much control over the closing process
+            TU.UI.closeWindow (w);
+        });
     }
 
     _curr_wm.TUopenWindow (w);
@@ -301,7 +329,20 @@ UI.closeWindow = function (w)
 {
     TU.Logger.debug ('[TitanUp.UI] closeWindow()');
 
-    if (_curr_wm == null)
+    if (typeof w.__beforeCloseCallbacks !== 'undefined')
+    {
+        var e = {
+            window: w
+        };
+
+        for (var i = 0; i < w.__beforeCloseCallbacks.length; i++)
+        {
+            var f = w.__beforeCloseCallbacks[i];
+            f(e);
+        }
+    }
+
+    if (_curr_wm === null)
     {
         w.close ();
     }

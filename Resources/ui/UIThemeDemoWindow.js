@@ -41,17 +41,20 @@ function UIThemeDemoWindow ()
 	
 	var _currTheme = Ti.App.Properties.getString ('currTheme');
 	
-	if (_currTheme == '')
+	if (_currTheme === null)
 	{
-		_currTheme == 'default';
+		_currTheme = 'default';
 	}
 
 	var _sbTheme = TU.UI.createSelectBar ({
 		left: margin,
 		top: margin,
+		height: 44,
 		width: ctlwidth,
-		labels: themes,
-        allow_deselect: false
+		config: {
+			labels: themes,
+	        allow_deselect: false
+		}
 	});
 
 	for (var i = 0; i < themes.length; i++)
@@ -63,7 +66,7 @@ function UIThemeDemoWindow ()
 		}
 	}
 	
-	_sbTheme.addEventListener ('TUchange', function (e) {
+	_sbTheme.addEventListener ('change', function (e) {
 		var idx = _sbTheme.xgetSelectedIndex ();
 		
 		Ti.App.Properties.setString ('currTheme', themes[idx]);

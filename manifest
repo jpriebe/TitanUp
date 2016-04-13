@@ -1,8 +1,8 @@
-#appname:TitanUpDemo
-#publisher:priebe
-#url:http://www.smorgasbork.com/
-#image:appicon.png
-#appid:com.smorgasbork.TitanUpDemo
-#desc:Demos the TitanUp library.
-#type:ipad
-#guid:5b934da9-0b4c-48ca-ab0c-3d47fd248374
+#appname: TitanUpDemo
+#publisher: priebe
+#url: http://www.smorgasbork.com/
+#image: appicon.png
+#appid: com.smorgasbork.titanup
+#desc: Demo of the TitanUp library
+#type: ipad
+#guid: 7cfcbc7e-1fb3-4a3b-9000-5fb8a0a034e0

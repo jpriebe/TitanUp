@@ -28,137 +28,46 @@ function DeviceDemoView ()
     var labelh = 25;
     var tabstop = 200;
 	var v, l;
+	
+	var captions = [];
+	var values = [];
+	
+	captions.push ('OS');
+	values.push (TU.Device.getOS ());
+	
+	if (TU.Device.getOS () === 'android')
+	{
+		captions.push ('Is Android 4+');
+		values.push (TU.Device.getAndroid4Plus () ? 'yes' : 'no');
 
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
+		captions.push ('Is Android 5+');
+		values.push (TU.Device.getAndroid5Plus () ? 'yes' : 'no');
 
-    l = Ti.UI.createLabel ({
-        text: 'OS:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+		captions.push ('Has Google Play Services');
+		values.push (TU.Device.getHasGooglePlayServices () ? 'yes' : 'no');
+	}
+	else	
+	{
+		captions.push ('iPhone Level');
+		values.push (TU.Device.getIphoneLevel ());
 
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getOS (),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
+		captions.push ('iPad Level');
+		values.push (TU.Device.getIpadLevel ());
 
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
+		captions.push ('Is iOS 7+');
+		values.push (TU.Device.getiOS7Plus () ? 'yes' : 'no');
+	}
 
-    
-    l = Ti.UI.createLabel ({
-        text: ((TU.Device.getOS() == 'ios') ? 'Is iOS 7+' : 'Is Android 4+'),
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+	captions.push ('Model');
+	values.push (TU.Device.getModel ());
 
-    v.add (l);
-    
-    var value = '';
-    if (TU.Device.getOS() == 'ios')
-    {
-        value = TU.Device.getiOS7Plus () ? 'yes' : 'no';
-    }
-    else
-    {
-        value = TU.Device.getAndroid4Plus () ? 'yes' : 'no';
-    }
-    
-    l = Ti.UI.createLabel ({
-        text: value,
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-
-
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-
-    l = Ti.UI.createLabel ({
-        text: 'Native Unit:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getNativeUnit (),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-
-    v.add (l);
-
-    _sv.add (v);
-
-
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-
-    l = Ti.UI.createLabel ({
-        text: 'Default Unit:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getDefaultUnit (),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-
-    v.add (l);
-
-    _sv.add (v);
-
-    var wpx, hpx, wdp, hdp;
+	captions.push ('Native Unit');
+	values.push (TU.Device.getNativeUnit ());
+	
+	captions.push ('Default Unit');
+	values.push (TU.Device.getDefaultUnit ());
+	
+	var wpx, hpx, wdp, hdp;
     if (TU.Device.getDefaultUnit() == 'px')
     {
         wpx = TU.Device.getDisplayWidth ();
@@ -176,64 +85,12 @@ function DeviceDemoView ()
         hpx = parseInt (hdp * TU.Device.getLogicalDensityFactor ());
     }
 
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-    
-    l = Ti.UI.createLabel ({
-        text: 'Display w x h (px):',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+	captions.push ('Display w x h (px)');
+	values.push (wpx + ' x ' + hpx);
 
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: wpx + ' x ' + hpx,
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-    
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-    
-    l = Ti.UI.createLabel ({
-        text: 'Display w x h (dp):',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: wdp + ' x ' + hdp,
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-    
+	captions.push ('Display w x h (dp)');
+	values.push (wdp + ' x ' + hdp);
+	
     if (TU.Device.getDefaultUnit() == 'px')
     {
         wpx = TU.Device.getWorkingWidth ();
@@ -251,240 +108,63 @@ function DeviceDemoView ()
         hpx = parseInt (hdp * TU.Device.getLogicalDensityFactor ());
     }
 
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-    
-    l = Ti.UI.createLabel ({
-        text: 'Working w x h (px):',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+	captions.push ('Working w x h (px)');
+	values.push (wpx + ' x ' + hpx);
 
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: wpx + ' x ' + hpx,
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-    
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-    
-    l = Ti.UI.createLabel ({
-        text: 'Working w x h (dp):',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+	captions.push ('Working w x h (dp)');
+	values.push (wdp + ' x ' + hdp);
+	
+	captions.push ('Density');
+	values.push (TU.Device.getDensity ());
 
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: wdp + ' x ' + hdp,
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-    
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
+	captions.push ('Logical Density Factor');
+	values.push (TU.Device.getLogicalDensityFactor ());
 
-    l = Ti.UI.createLabel ({
-        text: 'Density:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+	captions.push ('DPI');
+	values.push (TU.Device.getDpi ());
 
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getDensity (),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
+	captions.push ('Physical w x h (in)');
+	values.push (TU.Device.getPhysicalWidth ().toFixed (2) + ' x ' + TU.Device.getPhysicalHeight ().toFixed (2));
 
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
+	captions.push ('Screensize (in)');
+	values.push (TU.Device.getScreensize ().toFixed (2));
 
-    l = Ti.UI.createLabel ({
-        text: 'Logical Density Factor:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
+	captions.push ('Is Tablet');
+	values.push (TU.Device.getIsTablet () ? 'yes' : 'no');
 
-    v.add (l);
+	for (var i = 0; i < captions.length; i++)
+	{
+	    v = Ti.UI.createView ({
+	        width: labelw,
+	        height: labelh,
+	        top: spacing
+	    });
+	
+	    l = Ti.UI.createLabel ({
+	        text: captions[i] + ':',
+	        color: TU.UI.Theme.darkTextColor,
+	        font: TU.UI.Theme.fonts.mediumBold,
+	        top: 0,
+	        left: 0
+	    });
+	
+	    v.add (l);
+	    
+	    l = Ti.UI.createLabel ({
+	        text: values[i],
+	        top: 0,
+	        left: tabstop,
+	        right: 0,
+	        color: TU.UI.Theme.darkTextColor,
+	        font: TU.UI.Theme.fonts.medium
+	    });
+	    
+	    v.add (l);
+	    
+	    _sv.add (v);
+	}
 
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getLogicalDensityFactor (),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-
-    v.add (l);
-
-    _sv.add (v);
-    
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-
-    l = Ti.UI.createLabel ({
-        text: 'DPI:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getDpi (),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-
-    l = Ti.UI.createLabel ({
-        text: 'Physical w x h (in):',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getPhysicalWidth ().toFixed (2) + ' x ' + TU.Device.getPhysicalHeight ().toFixed (2),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-        
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-
-    l = Ti.UI.createLabel ({
-        text: 'Screensize (in):',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getScreensize ().toFixed (2),
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-    
-    v = Ti.UI.createView ({
-        width: labelw,
-        height: labelh,
-        top: spacing
-    });
-
-    l = Ti.UI.createLabel ({
-        text: 'Is tablet:',
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.mediumBold,
-        top: 0,
-        left: 0
-    });
-
-    v.add (l);
-    
-    l = Ti.UI.createLabel ({
-        text: TU.Device.getIsTablet () ? 'yes' : 'no',
-        top: 0,
-        left: tabstop,
-        right: 0,
-        color: TU.UI.Theme.darkTextColor,
-        font: TU.UI.Theme.fonts.medium
-    });
-    
-    v.add (l);
-    
-    _sv.add (v);
-    
-   	
-	return _self;
+ 	return _self;
 }
 
 module.exports = DeviceDemoView;

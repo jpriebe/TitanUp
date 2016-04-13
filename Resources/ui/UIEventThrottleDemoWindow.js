@@ -19,8 +19,6 @@ function UIEventThrottleDemoWindow ()
 		left: margin,
 		right: margin,
 		bottom: margin,
-		borderColor: TU.UI.Theme.darkTextColor,
-		backgroundColor: TU.UI.Theme.lightBackgroundColor,
 		layout: 'vertical'
 	});
 	

@@ -1,43 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
-    <deployment-targets>
-        <target device="tizen">false</target>
-        <target device="mobileweb">true</target>
-        <target device="iphone">true</target>
-        <target device="ipad">true</target>
-        <target device="android">true</target>
-        <target device="blackberry">false</target>
-    </deployment-targets>
-    <sdk-version>4.1.0.GA</sdk-version>
-    <id>com.smorgasbork.TitanUpDemo</id>
+    <id>com.smorgasbork.titanup</id>
     <name>TitanUpDemo</name>
     <version>1.0</version>
     <publisher>priebe</publisher>
     <url>http://www.smorgasbork.com/</url>
-    <description>Demos the TitanUp library.</description>
-    <copyright>2015 by Jason Priebe</copyright>
+    <description>Demo of the TitanUp library</description>
+    <copyright>2016 by priebe</copyright>
     <icon>appicon.png</icon>
-    <persistent-wifi>false</persistent-wifi>
-    <prerendered-icon>false</prerendered-icon>
-    <statusbar-style>default</statusbar-style>
-    <statusbar-hidden>false</statusbar-hidden>
     <fullscreen>false</fullscreen>
     <navbar-hidden>false</navbar-hidden>
     <analytics>true</analytics>
-    <guid>5b934da9-0b4c-48ca-ab0c-3d47fd248374</guid>
-    <property name="ti.ui.defaultunit">dip</property>
+    <guid>7cfcbc7e-1fb3-4a3b-9000-5fb8a0a034e0</guid>
+    <property name="ti.ui.defaultunit" type="string">dp</property>
     <ios>
-        <min-sdk-ver>4.5</min-sdk-ver>
         <plist>
             <dict>
-                <key>NSLocationWhenInUseUsageDescription</key>
-                <string>Used to demo TitanUp's geolocation support</string>
                 <key>UISupportedInterfaceOrientations~iphone</key>
                 <array>
                     <string>UIInterfaceOrientationPortrait</string>
-                    <string>UIInterfaceOrientationPortraitUpsideDown</string>
-                    <string>UIInterfaceOrientationLandscapeLeft</string>
-                    <string>UIInterfaceOrientationLandscapeRight</string>
                 </array>
                 <key>UISupportedInterfaceOrientations~ipad</key>
                 <array>
@@ -46,17 +27,27 @@
                     <string>UIInterfaceOrientationLandscapeLeft</string>
                     <string>UIInterfaceOrientationLandscapeRight</string>
                 </array>
+                <key>UIRequiresPersistentWiFi</key>
+                <false/>
+                <key>UIPrerenderedIcon</key>
+                <false/>
+                <key>UIStatusBarHidden</key>
+                <false/>
+                <key>UIStatusBarStyle</key>
+                <string>UIStatusBarStyleDefault</string>
+                <key>Used to demo TitanUp's geolocation support</key>
+                <string>Used to display location on map</string>
             </dict>
         </plist>
     </ios>
     <android xmlns:android="http://schemas.android.com/apk/res/android">
         <manifest android:installLocation="auto"
-            android:versionCode="100" android:versionName="2.0.0">
+            android:versionCode="101" android:versionName="2.0.1">
             <application>
                 <meta-data
                     android:name="com.google.android.maps.v2.API_KEY" android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
             </application>
-            <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21"/>
+            <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="23"/>
             <!-- Allows the API to download data from Google Map servers -->
             <uses-permission android:name="android.permission.INTERNET"/>
             <!-- Allows the API to cache data -->
@@ -83,10 +74,19 @@
         <theme>default</theme>
     </mobileweb>
     <modules>
-        <module platform="android">so.hau.tomas.pager</module>
         <module platform="android">com.tripvi.drawerlayout</module>
         <module platform="android">org.iotashan.titouchimageview</module>
+        <module platform="android">so.hau.tomas.pager</module>
         <module platform="iphone">ti.map</module>
         <module platform="android">ti.map</module>
     </modules>
+    <deployment-targets>
+        <target device="android">true</target>
+        <target device="ipad">true</target>
+        <target device="iphone">true</target>
+        <target device="mobileweb">false</target>
+        <target device="windows">false</target>
+    </deployment-targets>
+    <sdk-version>5.2.2.GA</sdk-version>
+    <property name="appc-app-id" type="string">56a21268a4ad0d6c57410b05</property>
 </ti:app>

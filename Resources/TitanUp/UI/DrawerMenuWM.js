@@ -429,7 +429,7 @@ function DrawerMenuWM (params)
             // android best practices suggest opening the app with the drawer open until the
             // user learns to operate it himself
             // http://developer.android.com/design/patterns/navigation-drawer.html
-            var drawer_opened_yet = Ti.App.Properties.getBool ("General.drawer_opened", false);
+            var drawer_opened_yet = Ti.App.Properties.getBool ("TitanUp.general.drawer_opened", false);
             if (!drawer_opened_yet)
             {
                 // note -- we need to distinguish between a user-initiated open and the
@@ -447,7 +447,7 @@ function DrawerMenuWM (params)
                 setTimeout (function () {
                     d.addEventListener('draweropen', function(e) {
                         TU.Logger.info ("[MainMenuWindow.init_win_android] drawer opened by user...");
-                        Ti.App.Properties.setBool ("General.drawer_opened", true);
+                        Ti.App.Properties.setBool ("TitanUp.general.drawer_opened", true);
                     });
                 }, 1000);
             }

@@ -76,6 +76,14 @@ function GalleryView (params)
 
     var _lastLoadedOrientation = '';
 
+    var _collapseLabelProps = {
+        font: { fontFamily: JSON.parse (JSON.stringify (TU.UI.Theme.fonts.medium)), fontSize: 13 },
+        title: "\u25BC"
+    };
+    var _expandLabelProps = {
+        font: { fontFamily: JSON.parse (JSON.stringify (TU.UI.Theme.fonts.medium)), fontSize: 13 },
+        title: "\u25B2"
+    };
 
     _process_params ();
     _init ();
@@ -203,6 +211,16 @@ function GalleryView (params)
         {
             _showImageCount = config.showImageCount;
         }
+
+        if (typeof config.collapseLabelProps !== 'undefined')
+        {
+            _collapseLabelProps = config.collapseLabelProps;
+        }
+        
+        if (typeof config.expandLabelProps !== 'undefined')
+        {
+            _expandLabelProps = config.expandLabelProps;
+        }
     }
 
 
@@ -218,7 +236,9 @@ function GalleryView (params)
                     startIndex: idx,
                     genFixedAdCallback: _genFixedAdCallback,
                     genInterstitialCallback: _genInterstitialCallback,
-                    showImageCount: _showImageCount
+                    showImageCount: _showImageCount,
+                    collapseLabelProps: _collapseLabelProps,
+                    expandLabelProps: _expandLabelProps
                 }
             });
             _self.barColor = _barColor;

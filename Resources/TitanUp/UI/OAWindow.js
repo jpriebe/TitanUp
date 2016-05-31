@@ -271,11 +271,11 @@ function OAWindow (params)
     {
         _self = Ti.UI.createWindow (params);
 
-        if (_supportedOrientations == 'all')
+        if (_supportedOrientations === 'all')
         {
             Ti.Gesture.addEventListener ('orientationchange', onorientationchange);
 
-            _self.addEventListener ('close', function (e) {
+            TU.UI.registerBeforeCloseCallback(_self, function (e) {
                 Ti.Gesture.removeEventListener ('orientationchange', onorientationchange);
             });
         }

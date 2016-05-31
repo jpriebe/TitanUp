@@ -91,7 +91,7 @@ function CircularProgressBar (params)
         }
         if (typeof params.borderRadius === 'undefined')
         {
-            params.borderRadius = (_config.size + _config.margin) / 2 * (Ti.Platform.displayCaps.logicalDensityFactor || 1);
+            params.borderRadius = parseInt ((_config.size + _config.margin) / 2);
         }
     }
 
@@ -102,19 +102,19 @@ function CircularProgressBar (params)
         _wrapper = Ti.UI.createView({
             width: _config.size,
             height: _config.size,
-            borderRadius: _config.size / 2 * (Ti.Platform.displayCaps.logicalDensityFactor || 1)
+            borderRadius: parseInt (_config.size / 2)
         });
 
         _layer1 = Ti.UI.createView({
             width: _config.size,
             height: _config.size,
-            borderRadius: _config.size / 2 * (Ti.Platform.displayCaps.logicalDensityFactor || 1),
+            borderRadius: parseInt (_config.size / 2),
             backgroundColor: _config.progressColor
         });
 
         _layer2 = Ti.UI.createView({
             left: 0,
-            width: _config.size / 2,
+            width: parseInt (_config.size / 2),
             height: _config.size,
             backgroundColor: params.backgroundColor
         });
@@ -127,7 +127,7 @@ function CircularProgressBar (params)
 
         var layer3Inner = Ti.UI.createView({
             right: 0,
-            width: _config.size / 2,
+            width: parseInt (_config.size / 2),
             height: _config.size,
             backgroundColor: params.backgroundColor
         });
@@ -135,7 +135,7 @@ function CircularProgressBar (params)
 
         _layer4 = Ti.UI.createView({
             right: 0,
-            width: _config.size / 2,
+            width: parseInt (_config.size / 2),
             height: _config.size,
             backgroundColor: _config.progressColor
         });
@@ -143,7 +143,7 @@ function CircularProgressBar (params)
         _topper = Ti.UI.createView({
             width: _config.topper.size,
             height: _config.topper.size,
-            borderRadius: _config.topper.size / 2 * (Ti.Platform.displayCaps.logicalDensityFactor || 1),
+            borderRadius: parseInt (_config.topper.size / 2),
             backgroundColor: _config.topper.color
         });
 

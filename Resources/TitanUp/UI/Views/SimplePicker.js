@@ -23,7 +23,7 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
 	var _btn_cancel = null;
 
 	var params = {
-		backgroundColor: bgcolor,
+		backgroundColor: '#fff',
         width: '80%',
         height: '80%',
         borderRadius: 8
@@ -144,6 +144,10 @@ function PickerPopup (bgcolor, highlight_bgcolor, color, highlight_color, values
                     scrollheight = 0;
                 }
 
+                if ((_rowheight * (_selidx + 3)) <= (TU.Device.getDisplayHeight() * 0.8)) {
+                  scrollheight = 0;
+                }
+
                 if (_os === 'android')
                 {
                     // https://jira.appcelerator.org/browse/TIMOB-17954
@@ -170,7 +174,7 @@ function SimplePicker (params)
 	var _self = null;
 	var _label = null;
 	var _values = [];
-	var _value = null;
+	var _value = "";
 	var _ppopup = null;
     var _parent = null; // this is the parent view to which we attach the popup
     var _highlight_bgcolor = TU.UI.Theme.highlightColor;
@@ -185,13 +189,7 @@ function SimplePicker (params)
 			_values = params[k];
 			continue;
 		}
-		
-        if (k === 'value')
-        {
-            _value = params[k];
-            continue;
-        }
-    
+
         if (k === 'parent')
         {
             _parent = params[k];
@@ -220,15 +218,11 @@ function SimplePicker (params)
             message: 'Error: you must specify a parent view in params.parent, and the parent view must have a layout of "composite"'
         };
     }
-    
 
-    if (_value === null)
-    {
-        if (_values.length > 0)
-        {
-            _value = _values[0];
-        }
-    }
+	if (_values.length > 0)
+	{
+		_value = _values[0];
+	}
 
     if (typeof newparams.height === 'undefined')
     {

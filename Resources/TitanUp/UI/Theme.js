@@ -22,28 +22,14 @@ function initialize ()
     Theme.backgroundColor = Theme.lightBackgroundColor;
     Theme.textColor = Theme.darkTextColor;
 
-    if (TU.Device.getOS () == 'ios')
-    {
-        Theme.fonts = {
-            small: { fontSize: 12 },
-            medium: { fontSize: 16 },
-            large: { fontSize: 24 },
-            smallBold: { fontSize: 12, fontWeight: 'bold' },
-            mediumBold: { fontSize: 16, fontWeight: 'bold' },
-            largeBold: { fontSize: 24, fontWeight: 'bold' }
-        };
-    }
-    else
-    {
-        Theme.fonts = {
-            small: { fontSize: '13dp' },
-            medium: { fontSize: '18dp' },
-            large: { fontSize: '26dp' },
-            smallBold: { fontSize: '13dp', fontWeight: 'bold' },
-            mediumBold: { fontSize: '18dp', fontWeight: 'bold' },
-            largeBold: { fontSize: '26dp', fontWeight: 'bold' }
-        };
-    }
+    Theme.fonts = {
+        small: { fontSize: 12 },
+        medium: { fontSize: 16 },
+        large: { fontSize: 24 },
+        smallBold: { fontSize: 12, fontWeight: 'bold' },
+        mediumBold: { fontSize: 16, fontWeight: 'bold' },
+        largeBold: { fontSize: 24, fontWeight: 'bold' }
+    };
 }
 
 

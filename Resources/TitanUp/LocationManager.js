@@ -17,10 +17,12 @@ var _listener_active = false;
 var _first_callback_complete = false;
 var _app_paused = false;
 var _timeout = null;
-var _purpose = 'To provide information tailored to your location.';
 
 var _update_callbacks = [];
-
+var _use_type = Ti.Geolocation.AUTHORIZATION_ALWAYS;
+var _initialized = false;
+var _asked_for_permission = false;
+var _denied_message = null;
 
 function LocationManager ()
 {
@@ -34,7 +36,8 @@ function add_listener ()
         return;
     }
 
-    TU.Logger.debug ("[TitanUp.LocationManager] adding location callback...");
+    TU.Logger.info ("[TitanUp.LocationManager] adding location callback...");
+
     Ti.Geolocation.addEventListener('location', callback);
     _listener_active = true;
 }
@@ -46,7 +49,8 @@ function remove_listener ()
         return;
     }
 
-    TU.Logger.debug ("[TitanUp.LocationManager] removing location callback...");
+    TU.Logger.info ("[TitanUp.LocationManager] removing location callback...");
+
     Ti.Geolocation.removeEventListener('location', callback);
     _listener_active = false;
 }
@@ -78,7 +82,7 @@ function check_update_callbacks ()
 
         if (o.last_loc == null)
         {
-            TU.Logger.debug ('[LocationManager] got first update; calling callback');
+            TU.Logger.debug ('[TitanUp.LocationManager.check_update_callbacks] (callback ' + i + ', ' + o.distance + ') got first update; calling callback');
             o.last_loc = JSON.parse (JSON.stringify (_coords));
             o.function ();
             continue;
@@ -87,13 +91,13 @@ function check_update_callbacks ()
         var dist = LocationManager.compute_distance (o.last_loc.latitude, o.last_loc.longitude, _coords.latitude, _coords.longitude);
         if (dist >= o.distance)
         {
-            TU.Logger.debug ('[LocationManager] (callback ' + i + ', ' + o.distance + ') moved ' + dist + ' km since last update; calling callback');
+            TU.Logger.debug ('[TitanUp.LocationManager.check_update_callbacks] (callback ' + i + ', ' + o.distance + ') moved ' + dist + ' km since last update; calling callback');
             o.last_loc = JSON.parse (JSON.stringify (_coords));
             o.function ();
         }
         else
         {
-            TU.Logger.debug ('[LocationManager] (callback ' + i + ', ' + o.distance + ') moved ' + dist + ' km since last update; not calling callback');
+            TU.Logger.debug ('[TitanUp.LocationManager.check_update_callbacks] (callback ' + i + ', ' + o.distance + ') only moved ' + dist + ' km since last update; not calling callback');
         }
     }
 }
@@ -102,7 +106,7 @@ function callback (e)
 {
     if (!e.success || e.error)
     {
-        TU.Logger.error("[TitanUp.LocationManager]  Error: " + JSON.stringify (e.error));
+        TU.Logger.error("[TitanUp.LocationManager]  Error in location callback: " + JSON.stringify (e.error));
     }
     else
     {
@@ -118,7 +122,7 @@ function callback (e)
                 + "; timestamp: " + e.coords.timestamp);
 
             // save this for later
-            Ti.App.Properties.setObject ('Location.last_coords', _coords);
+            Ti.App.Properties.setObject ('TitanUp.location.last_coords', _coords);
 
             remove_listener ();
             // put the geolocation subsystem to sleep for a minute
@@ -145,17 +149,61 @@ function callback (e)
     }
 }
 
+LocationManager.checkPermission = function(permission, callback) {
+    if (_initialized) {
+        requestPermissions(permission, callback);
+    } else {
+        var initializedInterval = setInterval(function() {
+            if (_initialized) {
+                clearInterval(initializedInterval);
+                requestPermissions(permission, callback);
+            }
+        }, 100);
+    }
+};
 
+function requestPermissions (callback)
+{
+    if (Ti.Geolocation.hasLocationPermissions(_use_type)) {
+        TU.Logger.info ("[TitanUp.LocationManager] already have permission");
+        return callback(true);
+    }
 
+    if (_asked_for_permission) {
+        return callback(false);
+    }
+
+    TU.Logger.info ("[TitanUp.LocationManager] requesting permission");
+    Ti.Geolocation.requestLocationPermissions(_use_type, function(e) {
+        TU.Logger.info ("[TitanUp.LocationManager] requestLocationPermissions callback");
+
+        _asked_for_permission = true;
+        if (e.success) {
+            TU.Logger.info ("[TitanUp.LocationManager] permission granted");
+            callback (true);
+            return;
+        }
+
+        TU.Logger.info ("[TitanUp.LocationManager] permission denied");
+
+        if (Ti.App.Properties.getBool ('TitanUp.location.location_alert_displayed', false)) {
+            callback (false);
+            return;
+        }
+
+        if (_denied_message) {
+            alert(_denied_message);
+        }
+
+        Ti.App.Properties.setBool ('TitanUp.location.location_alert_displayed', true);
+
+        callback (false);
+    });
+}
 
 function _init ()
 {
-    if (!Ti.Geolocation.locationServicesEnabled)
-    {
-        return;
-    }
-
-    _coords = Ti.App.Properties.getObject ('Location.last_coords', null);
+    _coords = Ti.App.Properties.getObject ('TitanUp.location.last_coords', null);
 
     if (TU.Device.getOS () == 'ios')
     {
@@ -208,8 +256,6 @@ function _init ()
         remove_listener ();
     });
 
-    Ti.Geolocation.purpose = _purpose;
-
     // call once for a quick position update -- might be cached, but at least
     // you'll have something quick in case the user access location-dependent
     // content.
@@ -234,19 +280,33 @@ LocationManager.getCoords = function ()
 /**
  * Initializes the LocationManager so you can start getting location data
  */
-LocationManager.init = function (desired_accuracy, purpose)
+LocationManager.init = function (desired_accuracy, use_type, denied_message)
 {
+    TU.Logger.info ("[TitanUp.LocationManager.init] initializing (desired_accuracy = " + desired_accuracy + ")");
+
     if (typeof desired_accuracy !== 'undefined')
     {
         _desired_accuracy = desired_accuracy;
     }
 
-    if (typeof purpose !== 'undefined')
+    if (typeof use_type !== 'undefined')
     {
-        _purpose = purpose;
+        _use_type = use_type;
     }
 
-    _init ();
+    if (typeof denied_message !== 'undefined')
+    {
+        _denied_message = denied_message;
+    }
+
+    requestPermissions(function(success) {
+        _initialized = true;
+        if (!success) {
+            return;
+        }
+
+        _init();
+    });
 };
 
 /**

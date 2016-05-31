@@ -8,9 +8,11 @@ function GalleryViewImagePager (params) {
     var _vp = null;
     var _captionView = null;
     var _captionOverlay = null;
-    var _captionLabel = null;
     var _captionExpandedLabel = null;
     var _adView = null;
+
+    var _captionExpandedDownArrowLabel = null;
+    var _captionCollapsedArrowLabel = null;
 
     var _images = [];
     var _views = [];
@@ -34,7 +36,10 @@ function GalleryViewImagePager (params) {
     var _caption_font = JSON.parse (JSON.stringify (TU.UI.Theme.fonts.medium));
     _caption_font.fontSize = _caption_fs;
 
-    var _caption_is_collapsed = true;
+    var _collapseLabelProps = null;
+    var _expandLabelProps = null;
+    
+    var _caption_is_collapsed = false;
 
     _process_params ();
     _init ();
@@ -93,6 +98,16 @@ function GalleryViewImagePager (params) {
         if (typeof config.genInterstitialCallback !== 'undefined')
         {
             _genInterstitialCallback = config.genInterstitialCallback;
+        }
+
+        if (typeof config.collapseLabelProps !== 'undefined')
+        {
+            _collapseLabelProps = config.collapseLabelProps;
+        }
+
+        if (typeof config.expandLabelProps !== 'undefined')
+        {
+            _expandLabelProps = config.expandLabelProps;
         }
     }
 
@@ -212,6 +227,14 @@ function GalleryViewImagePager (params) {
 
         TU.Logger.debug ('[GVIP] unloading image ' + _views[idx].image_index + ' (page ' + idx + ")");
 
+        TU.Logger.debug ("[GVIP] available memory: " + Ti.Platform.availableMemory);
+
+        if (typeof _views[idx].image_view !== 'undefined')
+        {
+            // this is a TiTouchImageView -- take special care to manage memory
+            _views[idx].image_view.recycleBitmap ();
+        }
+
         // I thought this might have something to do with it, but maybe not....
         //recursive_remove_children (_views[idx]);
         _views[idx].removeAllChildren ();
@@ -300,26 +323,6 @@ function GalleryViewImagePager (params) {
 
     function load_image_via_xhr (v, url)
     {
-        url = '' + url;
-        if (url.match (/^\//))
-        {
-            var iv = TiTouchImageView.createView({
-                backgroundColor : '#000',
-                image: url,
-                defaultImage: '',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zoom: 1,
-                maxZoom: 3,
-                minZoom: 0.25
-            });
-
-            v.add (iv);
-            return;
-        }
-        
         var xhr = Ti.Network.createHTTPClient ();
 
         xhr.onload = function (e) {
@@ -337,6 +340,8 @@ function GalleryViewImagePager (params) {
                 maxZoom: 3,
                 minZoom: 0.25
             });
+
+            v.image_view = iv;
 
             v.add (iv);
         };
@@ -367,31 +372,15 @@ function GalleryViewImagePager (params) {
             return v;
         }
 
-        var view;
-        url = '' + url;
-        if (url.match (/^\//))
-        {
-            // local image
-            view = Ti.UI.createImageView({
-                backgroundColor : '#000',
-                width : w,
-                height : h,
-                image : url,
-                defaultImage: ''
-            });            
-        }
-        else
-        {
-            view = TU.UI.createRemoteImageView({
-                backgroundColor : '#000',
-                width : w,
-                height : h,
-                image : url,
-                defaultImage: ''
-            });
-        }
-        
 
+        //var view = Ti.UI.createImageView({
+        var view = TU.UI.createRemoteImageView({
+            backgroundColor : '#000',
+            width : w,
+            height : h,
+            image : url,
+            defaultImage: ''
+        });
 
         var sv = Ti.UI.createScrollView({
             top: 0,
@@ -632,20 +621,19 @@ function GalleryViewImagePager (params) {
             opacity: 0.5
         });
 
-        _captionLabel = Ti.UI.createLabel({
-            text : '',
-            top: _caption_margin,
-            left: _caption_margin,
-            right: _caption_margin,
-            bottom: _caption_margin,
+        _captionCollapsedArrowLabel = Ti.UI.createLabel({
+            text: _expandLabelProps.title,
+            textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
             color : '#fff',
-            font : _caption_font,
-            ellipsize: true,
-            zIndex : 2
+            font : _expandLabelProps.font,
+            zIndex : 2,
+            visible: false
         });
 
+        _caption_height = _captionCollapsedArrowLabel.rect.height + 32;
+
         _captionView.add (_captionOverlay);
-        _captionView.add (_captionLabel);
+        _captionView.add (_captionCollapsedArrowLabel);
 
         _captionExpandedLabel = Ti.UI.createLabel({
             text: '',
@@ -657,8 +645,20 @@ function GalleryViewImagePager (params) {
             visible: false
         });
 
+        _captionExpandedDownArrowLabel = Ti.UI.createLabel({
+            text: _collapseLabelProps.title,
+            textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+            top: 0,
+            color : '#fff',
+            font : _collapseLabelProps.font,
+            zIndex : 2,
+            visible: false
+        });
+
+		_caption_expanded_height = _captionExpandedLabel.rect.height + _captionExpandedDownArrowLabel.rect.height + 32;
         _captionExpandedLabel.addEventListener ('postlayout', on_expcap_postlayout);
 
+        _captionView.add (_captionExpandedDownArrowLabel);
         _captionView.add (_captionExpandedLabel);
 
         _self.add(_captionView);
@@ -685,7 +685,9 @@ function GalleryViewImagePager (params) {
             return;
         }
 
-        TU.Logger.debug ("[GVIP] setting _caption_expanded_height = " + _caption_expanded_height);
+        _caption_expanded_height = _captionExpandedLabel.rect.height + _captionExpandedDownArrowLabel.rect.height + 32;
+		//_caption_expanded_height = _captionExpandedLabel.rect.height + 32;
+		TU.Logger.debug ("[GVIP] setting _caption_expanded_height = " + _caption_expanded_height);
 
         _caption_expanded_height = _captionExpandedLabel.rect.height + 32;
 
@@ -729,11 +731,6 @@ function GalleryViewImagePager (params) {
 
         var idx = v.image_index;
 
-        if (_captionLabel == null)
-        {
-            return;
-        }
-
         var headline = (typeof _images[idx].headline !== 'undefined') ? _images[idx].headline : '';
         var abstract = (typeof _images[idx].abstract !== 'undefined') ? _images[idx].abstract : '';
 
@@ -745,20 +742,21 @@ function GalleryViewImagePager (params) {
             caption = "[ " + idx1 + " / " + _images.length + " ]\n" + caption;
         }
 
-        _captionLabel.text = caption;
         _captionExpandedLabel.text = caption;
 
         if (_caption_is_collapsed)
         {
             _captionView.setHeight (_caption_collapsed_height);
             _captionExpandedLabel.setVisible (false);
-            _captionLabel.setVisible (true);
+            _captionExpandedDownArrowLabel.setVisible (false);
+            _captionCollapsedArrowLabel.setVisible (true);
         }
         else
         {
             _captionView.setHeight (_caption_expanded_height);
             _captionExpandedLabel.setVisible (true);
-            _captionLabel.setVisible (false);
+            _captionExpandedDownArrowLabel.setVisible (true);
+            _captionCollapsedArrowLabel.setVisible (false);
         }
 
         _captionView.setVisible (true);

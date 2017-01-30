@@ -5,6 +5,7 @@ function ViewPager (params)
     var _self = null;
 
     var _sv = null;
+    var _pv = null;
     var _title_bar = null;
     var _title_labels = [];
     var _title_labels_bold = [];
@@ -109,15 +110,9 @@ function ViewPager (params)
         _self = Ti.UI.createView (params);
 
         _curr_idx = _initialPageIndex;
+        
 
-        if (TU.Device.getOS() == 'ios')
-        {
-            init_view_ios ();
-        }
-        else if (TU.Device.getOS() == 'android')
-        {
-            init_view_android ();
-        }
+        init_view ();
 
         function onBeforeRemove (e)
         {
@@ -137,6 +132,21 @@ function ViewPager (params)
         _self.xgetCurrentPage = function ()
         {
             return _curr_idx;
+        };
+        
+        _self.xsetCurrentPage = function (index) {
+            if (TU.Device.getOS() == 'ios')
+            {
+                _curr_idx = index;
+                updateTitleBar(_curr_idx);
+                _sv.scrollToView(index);
+            }
+            if (TU.Device.getOS() == 'android')
+            {
+                _curr_idx = index;
+                updateTitleBar(_curr_idx);
+                _pv.scrollTo(index, true);
+            }
         };
     }
 
@@ -250,7 +260,7 @@ function ViewPager (params)
         _self.add (_title_bar);
     }
 
-    function init_view_ios ()
+    function init_view ()
     {
         build_title_bar ();
 
@@ -360,70 +370,7 @@ function ViewPager (params)
 
         _initialized = true;
     }
-
-
-    function init_view_android ()
-    {
-        var PagerModule = require("so.hau.tomas.pager");
-
-        build_title_bar();
-
-        var pages = [];
-        for (var i = 0; i < _views.length; i++)
-        {
-            pages.push ({
-                title: "",
-                view: _views[i]
-            });
-        }
-
-        var options = {
-            top: _titleBarHeight,
-            initialPage: _curr_idx,
-            pages: pages,
-            tabs: {
-                style: PagerModule.MARKET,
-                lineColor: _underlineColor,
-                lineColorSelected: _underlineColor,
-                tabBackground: _titleBarBackgroundColor,
-                tabBackgroundSelected: _titleBarBackgroundColor
-            }
-        };
-
-        if (!_showUnderline)
-        {
-            options.tabs.lineHeight = 0;
-            options.tabs.lineHeightSelected = 0;
-        }
-
-        if (_singleTitle)
-        {
-            options.tabs.padding = {
-                paddingClip : 0 - TU.Device.getDisplayWidth ()
-            };
-            options.tabs.lineHeightSelected = 0;
-        }
-
-
-        var _pv = PagerModule.createViewPager(options);
-
-        var _suppress_pagechange = false;
-
-        _pv.addEventListener('pageChange', function (e) {
-            if (_suppress_pagechange)
-            {
-                _suppress_pagechange = false;
-                return;
-            }
-
-            _curr_idx = e.to;
-            updateTitleBar(_curr_idx);
-            _self.fireEvent ('pagechange', { prevIndex: e.from, index: e.to });
-        });
-
-        _self.add (_pv);
-    }
-
+    
     return _self;
 }
 

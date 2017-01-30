@@ -1,6 +1,7 @@
 var TU = null;
 
 var _active_activity = null;
+var _active_window = null;
 var _activity_count = 0;
 
 function generate_name ()
@@ -19,7 +20,11 @@ function on_open (w)
         if (_active_activity == name) {
             Ti.App.fireEvent('resumed');
         }
+        else {
+            w.fireEvent ('visible');
+        }
 
+        _active_window = w;
         _active_activity = name;
     };
 
@@ -49,8 +54,14 @@ Context.track = function (win) {
     }
 
     win.context_id = generate_name ();
+
     win.addEventListener ('open', function (e) { on_open (win); });
     win.addEventListener ('close', function (e) { on_close (win); });
+};
+
+Context.getActiveWindow = function ()
+{
+    return _active_window;
 };
 
 Context.TUInit = function (tu)

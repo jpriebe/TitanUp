@@ -448,7 +448,7 @@ function GalleryViewImagePager (params) {
         }
     }
 
-    function load_content_ios ()
+    function build_content_view ()
     {
         _scrollableGalleryView = Ti.UI.createScrollableView({
             top : 0,
@@ -494,64 +494,6 @@ function GalleryViewImagePager (params) {
         _self.add(_scrollableGalleryView);
     }
 
-    function load_content_android ()
-    {
-        var PagerModule = require("so.hau.tomas.pager");
-
-        if (_curr_page_index != -1)
-        {
-            // we're here because of an orientation change; preserve the last page viewed
-        }
-        else
-        {
-            _curr_page_index = _effective_start_index;
-        }
-
-        var pages = [];
-        for (var i = 0; i < _views.length; i++)
-        {
-            pages.push ({
-                title: "",
-                view: _views[i]
-            });
-        }
-
-        var options = {
-            top: 0,
-            bottom: _pager_bottom,
-            initialPage: _curr_page_index,
-            pages: pages
-        };
-
-        _vp = PagerModule.createViewPager(options);
-
-        _vp.addEventListener('pageChange', function (e) {
-
-            if ((e.to < 0) || (e.to > _views.length - 1))
-            {
-                return;
-            }
-
-            TU.Logger.debug ('[GVIP] pageChange; e.to = ' + e.to);
-
-            var prev_page_index = _curr_page_index;
-            _curr_page_index = e.to;
-
-            load_neighboring_images (prev_page_index, _curr_page_index);
-
-            set_caption ();
-
-            var v = _views[_curr_page_index];
-            if (typeof v.image_index !== 'undefined')
-            {
-                _curr_image_index = v.image_index;
-                _self.fireEvent ("imagechanged", { index: v.image_index });
-            }
-        });
-
-        _self.add (_vp);
-    }
-
     function load_content ()
     {
         var curr_orientation = get_orientation ();
@@ -590,15 +532,7 @@ function GalleryViewImagePager (params) {
         }
 
         build_views ();
-
-        if (TU.Device.getOS () == 'ios')
-        {
-            load_content_ios ();
-        }
-        else
-        {
-            load_content_android ();
-        }
+        build_content_view ();
 
         _caption_collapsed_height = parseInt (_caption_fs * 3.5);
 

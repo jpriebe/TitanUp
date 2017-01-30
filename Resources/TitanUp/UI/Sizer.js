@@ -122,28 +122,7 @@ function initialize ()
 {
     _density = TU.Device.getDensity ();
 
-    switch (_density)
-    {
-        case 'low':
-            _ldf = 0.75;
-            break;
-        case 'medium':
-            _ldf = 1;
-            break;
-        case 'high':
-            _ldf = 1.5;
-            break;
-        case 'xhigh':
-            _ldf = 2;
-            break;
-        case 'xxhigh':
-            _ldf = 3;
-            break;
-        case 'xxxhigh':
-            _ldf = 4;
-            break;
-    }
-
+    _ldf = TU.Device.getLogicalDensityFactor();
 
     _defaultunit = TU.Device.getDefaultUnit ();
 

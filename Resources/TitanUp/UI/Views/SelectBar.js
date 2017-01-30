@@ -203,9 +203,20 @@ function SelectBar (params)
 
 		_button_width = parseInt ((_width - (_labels.length - 1) * _button_spacing - 2 * _horizontal_margin) / _labels.length);
 
+		// @FIXME -- this is a total hack
+		// we are having a repeat of a problem we had a couple of years ago where the last
+		// button would disappear on some android devices.  Before, it was a matter of rounding,
+		// and the total width was a dp or two larger than the overall view, and the the
+		// button would disappear.  I believe this has been corrected, but we're still having
+		// the problem.  If we shave one dp off the button width, the button appears.  When we
+		// only have 3 or 4 buttons, the visual effect isnt' too bad.  But I imagine if you had
+		// 7 or 8 buttons, it might be more noticeable.  With more time to experiment, we could
+		// probably find the exact source of the problem and apply a more subtle fix.
+		_button_width -= 1;
+
 		_button_bar = Ti.UI.createView ({
 			left: _horizontal_margin,
-			right: _horizontal_margin,
+			right: _horizontal_margin + 1,
 			top: 0,
             bottom: 0,
 			layout: 'horizontal'

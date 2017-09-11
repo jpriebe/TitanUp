@@ -9,11 +9,8 @@ Titanium in the first place?  The way to maximize your benefit from the platform
 is to go cross-platform. 
 
 TitanUp relies on some third-party Titanium modules for a couple of its views:
-  - ViewPager: so.hau.tomas.pager (http://tomas.hau.so/posts/2013/10/02/viewpager-module-revisited/), newest version of what was formerly known as net.bajawa.pager (https://marketplace.appcelerator.com/apps/2228)
   - DrawerMenuWM: Ti.DrawerLayout (https://github.com/manumaticx/Ti.DrawerLayout)
-  - GalleryView:
-    - so.hau.tomas.pager (see above)
-    - (optional) TiTouchImageView (https://github.com/iotashan/TiTouchImageView/)
+  - GalleryView: (optional) TiTouchImageView (https://github.com/iotashan/TiTouchImageView/)
 
 If you aren't using these classes, you don't need to install these modules.
 
@@ -122,8 +119,7 @@ TU.UI.Views.TextField
    not 100% compatible with standard TextField; see example code.
 
 TU.UI.Views.ViewPager
- - cross-platform viewpager (uses ScrollableView on iOS, net.bajawa.pager
-   on android)
+ - cross-platform viewpager (uses ScrollableView)
 
 MIGRATING FROM VERSION 1.0
 

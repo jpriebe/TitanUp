@@ -11,6 +11,7 @@ function GalleryViewPopup (params) {
     var _genFixedAdCallback = null;
     var _genInterstitialCallback = null;
     var _showImageCount = false;
+    var _expandLabelProps = null;
 
     _process_params ();
     _init ();
@@ -70,6 +71,16 @@ function GalleryViewPopup (params) {
         {
             _genInterstitialCallback = config.genInterstitialCallback;
         }
+        
+        if (typeof config.expandLabelProps !== 'undefined')
+        {
+            _expandLabelProps = config.expandLabelProps;
+        }
+        
+        if (typeof config.collapseLabelProps !== 'undefined')
+        {
+            _collapseLabelProps = config.collapseLabelProps;
+        }
     }
 
     function _init ()
@@ -100,7 +111,9 @@ function GalleryViewPopup (params) {
                 startIndex: _startIndex,
                 genFixedAdCallback: _genFixedAdCallback,
                 genInterstitialCallback: _genInterstitialCallback,
-                showImageCount: _showImageCount
+                showImageCount: _showImageCount,
+                expandLabelProps: _expandLabelProps,
+                collapseLabelProps: _collapseLabelProps
             }
         });
 

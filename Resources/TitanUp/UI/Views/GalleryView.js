@@ -427,7 +427,9 @@ function GalleryView (params)
                 startIndex: imageIdx,
                 genFixedAdCallback: _genFixedAdCallback,
                 genInterstitialCallback: _genInterstitialCallback,
-                showImageCount: _showImageCount
+                showImageCount: _showImageCount,
+                collapseLabelProps: _collapseLabelProps,
+                expandLabelProps: _expandLabelProps
             }
         });
         _popup.barColor = _barColor;

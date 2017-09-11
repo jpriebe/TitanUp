@@ -22,12 +22,12 @@ function UIViewsGalleryViewDemoWindow ()
        			{
 					width: 240,
 					height: 180,
-					url: 'http://lorempixel.com/240/180/city/' + i1
+					url: 'https://placeimg.com/240/180/animals?cb=' + i1
 				},
 				{
 				    width: 640,
 				    height: 480,
-				    url: 'http://lorempixel.com/640/480/city/' + i1
+				    url: 'https://placeimg.com/640/480/animals?cb=' + i1
 				}
 			]
 		};
